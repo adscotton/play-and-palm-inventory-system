@@ -1,0 +1,32 @@
+// src/App.jsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import InventoryList from './pages/InventoryList.jsx';
+import AddProduct from './pages/AddProduct.jsx';
+import ProductDetail from './pages/ProductDetail.jsx';
+import EditProduct from './pages/EditProduct.jsx';
+import About from './pages/About.jsx';
+import Account from './pages/Account.jsx';
+import CreateUser from './pages/CreateUser.jsx';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/home" element={<Dashboard />} />
+        <Route path="/inventory" element={<InventoryList />} />
+        <Route path="/add" element={<AddProduct />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/product/:id/edit" element={<EditProduct />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/users/new" element={<CreateUser />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;

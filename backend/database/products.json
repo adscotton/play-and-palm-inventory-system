@@ -1,0 +1,30 @@
+[
+  {
+    "sku": null,
+    "name": "Playstation 6",
+    "brand": "Sony",
+    "manufacturer": null,
+    "category": "console",
+    "price": 99.97,
+    "stock": 2,
+    "status": "Available",
+    "description": null,
+    "id": 1
+  },
+
+
+  {
+    "sku": null,
+    "name": "Playstation 5",
+    "brand": "Sony",
+    "manufacturer": null,
+    "category": "console",
+    "price": 99.97,
+    "stock": 2,
+    "status": "Available",
+    "description": null,
+    "id": 2
+  }
+
+  
+]

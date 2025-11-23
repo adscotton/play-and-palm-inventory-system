@@ -1,0 +1,128 @@
+/* Account page styles */
+.account-main {
+  max-width: 980px;
+  margin: 2rem auto;
+  padding: 1.25rem 2rem;
+  background: radial-gradient(circle at 10% 10%, rgba(126, 34, 206, 0.14), transparent 35%),
+              linear-gradient(145deg, #0b0b16 0%, #1a1030 45%, #120b26 100%);
+  border-radius: 18px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.account-title {
+  font-size: 1.85rem;
+  color: #ede9fe;
+  margin-bottom: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.account-form .form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.account-form .form-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-form .form-field.full {
+  flex: 1 1 100%;
+}
+
+.account-form label {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  color: #d9d6f9;
+}
+
+.account-form input,
+.account-form select,
+.account-form textarea {
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #3a2f59;
+  font-size: 1rem;
+  background: linear-gradient(180deg, #1c1633 0%, #141025 100%);
+  color: #f8fafc;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.account-form input:focus,
+.account-form select:focus,
+.account-form textarea:focus {
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+}
+
+.account-form input:disabled,
+.account-form select:disabled,
+.account-form textarea:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.form-error {
+  background-color: #4c1d95;
+  color: #f5e1ff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #a855f7;
+  margin-bottom: 1rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 10, 22, 0.8);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: linear-gradient(160deg, #1b1430 0%, #0f0b1e 100%);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  width: min(420px, 90vw);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  border: 1px solid #6d28d9;
+}
+
+.modal-card h3 {
+  margin: 0 0 0.35rem 0;
+  color: #f8fafc;
+}
+
+.modal-card p {
+  margin: 0 0 0.75rem 0;
+  color: #d9d6f9;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .account-form .form-row {
+    flex-direction: column;
+  }
+
+  .account-main {
+    padding: 1rem;
+    margin: 1rem;
+  }
+}

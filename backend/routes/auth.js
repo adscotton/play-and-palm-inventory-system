@@ -1,0 +1,76 @@
+// backend/routes/auth.js
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const jwt = require('jsonwebtoken');
+const { supabase } = require('../utils/supabaseClient');
+
+const router = express.Router();
+const DB_PATH = path.join(__dirname, '..', 'database', 'users.json');
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
+const HAS_SUPABASE = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY);
+
+function readUsers() {
+  if (!fs.existsSync(DB_PATH)) return [];
+  const raw = fs.readFileSync(DB_PATH, 'utf-8');
+  return JSON.parse(raw);
+}
+
+function normalize(val) {
+  return (val || '').trim().toLowerCase();
+}
+
+// NOTE: This is a demo login -- passwords are stored in plain-text in the sample DB.
+// For production, always store hashed passwords and use secure comparisons.
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'username and password required' });
+  }
+
+  const normalized = normalize(username);
+
+  // Prefer Supabase if configured
+  if (HAS_SUPABASE && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, username, email, password, first_name, last_name, role, contact_number, location')
+        .ilike('username', normalized)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data || data.password !== password) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      const token = jwt.sign(
+        { id: data.id, username: data.username, role: data.role },
+        JWT_SECRET,
+        { expiresIn: '8h' }
+      );
+      const { password: _p, ...safeUser } = data;
+      return res.json({ token, user: safeUser });
+    } catch (err) {
+      console.error('Supabase login error:', err.message || err);
+      // fall through to local fallback
+    }
+  }
+
+  // Local JSON fallback
+  const users = readUsers();
+  const user = users.find(
+    (u) => normalize(u.username) === normalized && u.password === password
+  );
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, {
+    expiresIn: '8h',
+  });
+  const { password: _p, ...safeUser } = user;
+  res.json({ token, user: safeUser });
+});
+
+module.exports = router;

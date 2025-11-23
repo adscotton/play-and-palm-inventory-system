@@ -1,0 +1,129 @@
+# 🚀 RUN ME FIRST - Setup Instructions
+
+## Step 1: Get Your Supabase Keys
+
+1. Go to https://app.supabase.com
+2. Select your project (or create one)
+3. Go to **Settings** → **API**
+4. Copy:
+   - **Project URL** → This is your `SUPABASE_URL`
+   - **Service Role Key** → This is your `SUPABASE_SERVICE_ROLE_KEY` (keep secret!)
+
+## Step 2: Update Backend .env
+
+```powershell
+notepad C:\play-and-palm-inventory\backend\.env
+```
+
+Replace with your actual keys:
+```
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...YOUR_ACTUAL_KEY...
+PORT=4000
+```
+
+Save and close.
+
+## Step 3: Start Backend
+
+```powershell
+cd C:\play-and-palm-inventory\backend
+npm install
+npm run dev
+```
+
+**Wait for this output:**
+```
+✓ Backend server running on http://localhost:4000
+```
+
+If you see an error, troubleshoot below.
+
+## Step 4: Start Frontend (New PowerShell Terminal)
+
+```powershell
+cd C:\play-and-palm-inventory\frontend
+npm install
+npm run dev
+```
+
+**You should see:**
+```
+VITE v7.x.x  ready in XXX ms
+
+➜  Local:   http://localhost:5173/
+```
+
+## Step 5: Open the App
+
+Open your browser to: **http://localhost:5173**
+
+Login with demo credentials:
+- **Username:** admin
+- **Password:** admin123
+
+## Troubleshooting
+
+### White Screen
+1. Press **F12** to open developer tools
+2. Go to **Console** tab
+3. Look for red error messages
+4. Check **Network** tab for failed requests to `http://localhost:4000`
+
+**Fix:** Ensure backend is running (see Step 3)
+
+### Backend Crashes
+1. Check the error in the terminal
+2. Verify `SUPABASE_SERVICE_ROLE_KEY` is correct (no spaces, no quotes)
+3. Ensure `PORT=4000` is not in use:
+   ```powershell
+   netstat -ano | Select-String ":4000"
+   ```
+
+### Port 4000 Already in Use
+```powershell
+# Find the PID
+netstat -ano | Select-String ":4000"
+
+# Kill it (replace 1234 with actual PID)
+taskkill /PID 1234 /F
+```
+
+Or change PORT in `.env` to 4001
+
+### Supabase Connection Error
+- The app will work anyway! Products save to `backend/database/products.json` locally
+- Check server console for "Supabase client created" message
+
+## Quick Test API
+
+Open a new PowerShell and test:
+```powershell
+# Check backend is alive
+curl http://localhost:4000/health
+
+# Fetch products
+curl http://localhost:4000/api/products
+
+# Create a product
+curl -X POST http://localhost:4000/api/products `
+  -H "Content-Type: application/json" `
+  -Body '{"name":"Test","brand":"Test","category":"console","price":99.99,"stock":5,"status":"Available","description":"Test"}'
+```
+
+## Key Files
+
+- `backend/.env` ← **Your Supabase keys go here**
+- `backend/server.js` ← Express app
+- `backend/routes/products.js` ← Product CRUD (uses Supabase or local JSON fallback)
+- `frontend/src/pages/InventoryList.jsx` ← Fetches products from backend
+- `backend/database/products.json` ← Local fallback database
+
+## What Happens
+
+1. **Frontend** sends requests to `http://localhost:4000/api/products`
+2. **Backend** tries to use Supabase
+3. If Supabase fails (bad key, network error), backend saves to local JSON file
+4. **Either way, products appear in the app!**
+
+Good luck! 🎉

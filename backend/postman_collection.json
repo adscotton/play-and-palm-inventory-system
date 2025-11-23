@@ -1,0 +1,83 @@
+{
+  "info": {
+    "name": "Play & Palm Backend",
+    "_postman_id": "play-and-palm-backend",
+    "description": "Collection for backend auth and products endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "Products - List",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api","products"] }
+      }
+    },
+    {
+      "name": "Products - Get By Id",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/products/:id", "host": ["{{baseUrl}}"], "path": ["api","products",":id"] }
+      }
+    },
+    {
+      "name": "Products - Create",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"sku\": \"TP-001\",\n  \"name\": \"Test Product\",\n  \"brand\": \"ExampleBrand\",\n  \"manufacturer\": \"ExampleCo\",\n  \"category\": \"Accessory\",\n  \"price\": 9.99,\n  \"stock\": 10,\n  \"status\": \"active\",\n  \"description\": \"Sample product for testing.\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api","products"] }
+      }
+    },
+    {
+      "name": "Products - Update",
+      "request": {
+        "method": "PUT",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"price\": 7.99\n}" },
+        "url": { "raw": "{{baseUrl}}/api/products/:id", "host": ["{{baseUrl}}"], "path": ["api","products",":id"] }
+      }
+    },
+    {
+      "name": "Products - Delete",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/api/products/:id", "host": ["{{baseUrl}}"], "path": ["api","products",":id"] }
+      }
+    }
+    ,
+    {
+      "name": "Users - Create",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"jdoe\",\n  \"password\": \"secret123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jdoe@example.com\",\n  \"role\": \"user\",\n  \"contactNumber\": \"555-1010\",\n  \"location\": \"Store 1\"\n}" },
+        "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api","users"] }
+      }
+    },
+    {
+      "name": "Users - List",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api","users"] }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" }
+  ]
+}
