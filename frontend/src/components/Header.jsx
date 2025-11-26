@@ -21,7 +21,7 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 10,
-    width: '100%', // ← Full width of .app-main (which is offset by CSS)
+    width: '100%', // Full width of .app-main (which is offset by CSS)
   },
   title: {
     margin: 0,

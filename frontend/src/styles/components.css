@@ -201,6 +201,22 @@
   box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
 }
 
+/* Ensure dropdowns match the dark form styling used elsewhere */
+select.form-input,
+select.form-select {
+  background: linear-gradient(180deg, #1c1633 0%, #141025 100%);
+  color: #f8fafc;
+  border-color: #3a2f59;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+select.form-input option,
+select.form-select option {
+  background-color: #0f0b1e;
+  color: #f8fafc;
+}
+
 .form-error {
   background-color: #ffebee;
   color: #c62828;

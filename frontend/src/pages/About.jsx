@@ -52,24 +52,23 @@ export default function About() {
           <section className="about-hero card">
             <div>
               <p className="eyebrow">Play &amp; Palm IMS</p>
-              <h1 className="about-title">Built for teams that care about every SKU</h1>
+              <h1 className="about-title">About Page</h1>
               <p className="about-description">
-                We help retail and wholesale teams keep inventory accurate, predictable, and ready for customers.
-                Our stack blends clean UX with dependable APIs so your operations stay calm even when demand spikes.
+                
               </p>
             </div>
             <div className="about-pillars">
               <div className="pillar">
-                <p className="pillar-title">Reliability</p>
-                <p className="pillar-copy">Audit-friendly history, alerts, and backups that just work.</p>
+                <p className="pillar-title"></p>
+                <p className="pillar-copy"></p>
               </div>
               <div className="pillar">
-                <p className="pillar-title">Clarity</p>
-                <p className="pillar-copy">Dashboards and exports that make sense to everyone on the floor.</p>
+                <p className="pillar-title"></p>
+                <p className="pillar-copy"></p>
               </div>
               <div className="pillar">
-                <p className="pillar-title">Speed</p>
-                <p className="pillar-copy">Snappy UI, quick search, and data that arrives in real-time.</p>
+                <p className="pillar-title"></p>
+                <p className="pillar-copy"></p>
               </div>
             </div>
           </section>
@@ -78,11 +77,10 @@ export default function About() {
           <section className="team-section">
             <div className="team-header">
               <div>
-                <p className="eyebrow">Team</p>
-                <h2 className="team-title">The people behind the product</h2>
+                <p className="eyebrow"></p>
+                <h2 className="team-title"></h2>
                 <p className="team-description">
-                  Six teammates with a mix of engineering, design, and operations backgrounds. We share a
-                  common goal: make inventory feel simple and calm for your crews.
+                  
                 </p>
               </div>
             </div>

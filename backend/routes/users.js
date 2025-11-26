@@ -8,6 +8,8 @@ const { supabase, hasSupabaseKey } = require('../utils/supabaseClient');
 const router = express.Router();
 const DB_PATH = path.join(__dirname, '..', 'database', 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
+const SUPABASE_USERS_TABLE = 'app_users';
+const AUDIT_TABLE = 'audit_logs';
 
 function ensureUsersFile() {
   try {
@@ -28,6 +30,21 @@ function readUsersLocal() {
 function writeUsersLocal(users) {
   ensureUsersFile();
   fs.writeFileSync(DB_PATH, JSON.stringify(users, null, 2), 'utf-8');
+}
+
+async function logAudit(userId, targetId, action, details = {}) {
+  if (!hasSupabaseKey || !supabase) return;
+  try {
+    await supabase.from(AUDIT_TABLE).insert([{
+      user_id: userId || null,
+      entity_type: 'user',
+      entity_id: targetId || null,
+      action,
+      details
+    }]);
+  } catch (err) {
+    console.error('Audit log failed:', err.message || err);
+  }
 }
 
 function verifyToken(req, res, next) {
@@ -56,7 +73,7 @@ router.get('/me', verifyToken, async (req, res) => {
   try {
     if (hasSupabaseKey && supabase) {
       const { id, username } = req.user || {};
-      let query = supabase.from('users').select('id, username, email, first_name, last_name, role, contact_number, location, created_at');
+      let query = supabase.from(SUPABASE_USERS_TABLE).select('id, username, email, first_name, last_name, role, contact_number, location, created_at');
       if (id) query = query.eq('id', id).limit(1).maybeSingle();
       else if (username) query = query.ilike('username', username).limit(1).maybeSingle();
       const { data, error } = await query;
@@ -86,14 +103,14 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
       firstName: p.firstName || p.first_name || null,
       lastName: p.lastName || p.last_name || null,
       email: p.email || null,
-      role: p.role || 'user',
+      role: p.role || 'staff',
       contactNumber: p.contactNumber || p.contact_number || null,
       location: p.location || null
     };
 
     const supabasePayload = {
       username: localUser.username,
-      password: localUser.password,
+      password_hash: localUser.password,
       email: localUser.email,
       first_name: localUser.firstName,
       last_name: localUser.lastName,
@@ -104,7 +121,7 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
     };
 
     if (hasSupabaseKey && supabase) {
-      const { data, error } = await supabase.from('users').insert([supabasePayload]).select().single();
+      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE).insert([supabasePayload]).select().single();
       if (error) {
         throw error;
       }
@@ -119,6 +136,7 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
         location: data.location || localUser.location,
         created_at: data.created_at || supabasePayload.created_at
       };
+      await logAudit(req.user?.id, data.id, 'CREATE', { username: data.username, role: data.role });
       return res.status(201).json(returned);
     }
 
@@ -138,6 +156,7 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
     };
     users.push(newUser);
     writeUsersLocal(users);
+    await logAudit(req.user?.id, newUser.id, 'CREATE', { username: newUser.username, role: newUser.role });
     return res.status(201).json(newUser);
   } catch (err) {
     console.error('POST /api/users error', err.message || err);
@@ -149,7 +168,7 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
 router.get('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
   try {
     if (hasSupabaseKey && supabase) {
-      const { data, error } = await supabase.from('users').select('id, username, email, first_name, last_name, role, contact_number, location, created_at').order('id', { ascending: true });
+      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE).select('id, username, email, first_name, last_name, role, contact_number, location, created_at').order('id', { ascending: true });
       if (error) throw error;
       return res.json(data);
     }
@@ -185,8 +204,9 @@ router.put('/:id', verifyToken, async (req, res) => {
     };
 
     if (hasSupabaseKey && supabase) {
-      const { data, error } = await supabase.from('users').update(updates).eq('id', id).select().single();
+      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE).update(updates).eq('id', id).select().single();
       if (error) throw error;
+      await logAudit(req.user?.id, id, 'UPDATE', { updates });
       return res.json(data);
     }
 
@@ -204,6 +224,7 @@ router.put('/:id', verifyToken, async (req, res) => {
     }};
     writeUsersLocal(users);
     const { password, ...safeUser } = users[idx];
+    await logAudit(req.user?.id, id, 'UPDATE', { updates });
     res.json(safeUser);
   } catch (err) {
     console.error('PUT /api/users/:id error', err.message || err);

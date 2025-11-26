@@ -10,6 +10,12 @@ import '../styles/inventory.css';
 const ITEMS_PER_PAGE = 8;
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
+function formatPrice(val) {
+  const num = Number(val);
+  if (!Number.isFinite(num)) return 'N/A';
+  return `$${num.toFixed(2)}`;
+}
+
 export default function InventoryList() {
   const [inventory, setInventory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,7 +73,9 @@ export default function InventoryList() {
     const statusMap = {
       'Available': 'status-available',
       'Low in Stock': 'status-low',
+      'Low Stock': 'status-low', // normalize alt label
       'No Stock': 'status-out',
+      'Out of Stock': 'status-out', // normalize alt label
     };
     return statusMap[status] || '';
   };
@@ -137,7 +145,7 @@ export default function InventoryList() {
                     <td className="inventory-cell">{item.name}</td>
                     <td className="inventory-cell">{item.brand}</td>
                     <td className="inventory-cell">{item.category}</td>
-                    <td className="inventory-cell">${item.price?.toFixed(2)}</td>
+                    <td className="inventory-cell">{formatPrice(item.price)}</td>
                     <td className="inventory-cell">{item.stock}</td>
                     <td className="inventory-cell">
                       <span className={`status-badge ${getStatusBadge(item.status)}`}>
@@ -164,7 +172,7 @@ export default function InventoryList() {
               disabled={currentPage === 1}
               className="pagination-button"
             >
-              ← Previous
+              Previous
             </button>
 
             <div className="pagination-numbers">
@@ -184,7 +192,7 @@ export default function InventoryList() {
               disabled={currentPage === totalPages}
               className="pagination-button"
             >
-              Next →
+              Next
             </button>
           </div>
 

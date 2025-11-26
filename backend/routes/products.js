@@ -2,10 +2,13 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { supabase } = require('../utils/supabaseClient');
 
 const DB_PRODUCTS = path.join(__dirname, '..', 'database', 'products.json');
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
+const AUDIT_TABLE = 'audit_logs';
 
 function ensureProductsFile() {
   try {
@@ -52,6 +55,41 @@ function normalizeName(name) {
   return (name || '').trim().toLowerCase();
 }
 
+function normalizeTags(tags) {
+  if (Array.isArray(tags)) return tags;
+  if (typeof tags === 'string') {
+    return tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+  }
+  return null;
+}
+
+function shapeProductResponse(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    price: row.price !== null && row.price !== undefined ? Number(row.price) : row.price,
+    stock: row.stock !== null && row.stock !== undefined ? Number(row.stock) : row.stock,
+  };
+}
+
+async function logAudit(userId, entityId, action, details = {}) {
+  if (!supabase) return;
+  try {
+    await supabase.from(AUDIT_TABLE).insert([{
+      user_id: userId || null,
+      entity_type: 'product',
+      entity_id: entityId || null,
+      action,
+      details
+    }]);
+  } catch (err) {
+    console.error('Audit log failed:', err.message || err);
+  }
+}
+
 function verifyToken(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: 'Authorization header missing' });
@@ -83,7 +121,7 @@ router.get('/', async (req, res) => {
         .order('id', { ascending: true });
 
       if (error) throw error;
-      return res.json(data || []);
+      return res.json((data || []).map(shapeProductResponse));
     } catch (err) {
       console.error('Supabase GET /products failed:', err.message || err);
     }
@@ -111,7 +149,7 @@ router.get('/:id', async (req, res) => {
 
       if (error) throw error;
       if (!data) return res.status(404).json({ error: 'Product not found' });
-      return res.json(data);
+      return res.json(shapeProductResponse(data));
     } catch (err) {
       console.error('Supabase GET /products/:id failed:', err.message || err);
     }
@@ -164,7 +202,7 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
     sku: sku || null,
     manufacturer: manufacturer || null,
     release_date: releaseDate || null,
-    tags: tags || null,
+    tags: normalizeTags(tags),
     image: image || null,
   };
 
@@ -192,7 +230,8 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
         return res.status(400).json({ error: error.message || 'Failed to create product' });
       }
 
-      return res.status(201).json(data);
+      await logAudit(req.user?.id, data.id, 'CREATE', { name: data.name, sku: data.sku, stock: data.stock });
+      return res.status(201).json(shapeProductResponse(data));
     } catch (err) {
       console.error('Supabase POST failed:', err.message || err);
     }
@@ -246,7 +285,7 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (sku !== undefined) updates.sku = sku || null;
     if (manufacturer !== undefined) updates.manufacturer = manufacturer || null;
     if (releaseDate !== undefined) updates.release_date = releaseDate || null;
-    if (tags !== undefined) updates.tags = tags || null;
+    if (tags !== undefined) updates.tags = normalizeTags(tags);
     if (image !== undefined) updates.image = image || null;
   }
   if (stock !== undefined) {
@@ -288,7 +327,8 @@ router.put('/:id', verifyToken, async (req, res) => {
         return res.status(400).json({ error: error.message || 'Update failed' });
       }
       if (!data) return res.status(404).json({ error: 'Product not found' });
-      return res.json(data);
+      await logAudit(req.user?.id, data.id, 'UPDATE', { updates });
+      return res.json(shapeProductResponse(data));
     } catch (err) {
       console.error('Supabase PUT failed:', err);
     }
@@ -338,6 +378,7 @@ router.delete('/:id', verifyToken, requireManagerOrAdmin, async (req, res) => {
         console.error('Supabase delete error:', error);
         return res.status(400).json({ error: error.message || 'Delete failed' });
       }
+      await logAudit(req.user?.id, id, 'DELETE', { name: data?.name, sku: data?.sku });
       return res.json({ message: 'Deleted', product: data });
     } catch (err) {
       console.error('Supabase DELETE failed:', err);
@@ -358,5 +399,3 @@ router.delete('/:id', verifyToken, requireManagerOrAdmin, async (req, res) => {
 });
 
 module.exports = router;
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';

@@ -9,6 +9,7 @@ const router = express.Router();
 const DB_PATH = path.join(__dirname, '..', 'database', 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 const HAS_SUPABASE = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY);
+const SUPABASE_USERS_TABLE = 'app_users';
 
 function readUsers() {
   if (!fs.existsSync(DB_PATH)) return [];
@@ -34,13 +35,13 @@ router.post('/login', async (req, res) => {
   if (HAS_SUPABASE && supabase) {
     try {
       const { data, error } = await supabase
-        .from('users')
-        .select('id, username, email, password, first_name, last_name, role, contact_number, location')
+        .from(SUPABASE_USERS_TABLE)
+        .select('id, username, email, password_hash, first_name, last_name, role, contact_number, location')
         .ilike('username', normalized)
         .maybeSingle();
 
       if (error) throw error;
-      if (!data || data.password !== password) {
+      if (!data || data.password_hash !== password) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 

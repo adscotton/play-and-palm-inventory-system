@@ -67,6 +67,11 @@
   cursor: not-allowed;
 }
 
+.account-form select option {
+  background: #0f0b1e;
+  color: #f8fafc;
+}
+
 .form-actions {
   display: flex;
   gap: 0.75rem;

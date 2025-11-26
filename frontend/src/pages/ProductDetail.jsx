@@ -89,7 +89,7 @@ export default function ProductDetail() {
         <Header />
         <main className="app-content">
           <button onClick={() => navigate('/inventory')} className="product-back-button">
-            ← Back to Inventory
+            Back to Inventory
           </button>
 
           <div className="product-detail-card">

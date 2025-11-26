@@ -6,7 +6,7 @@ const SUPABASE_URL = (process.env.SUPABASE_URL || '').trim();
 const SUPABASE_SERVICE_ROLE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 const SUPABASE_ANON_KEY = (process.env.SUPABASE_ANON_KEY || '').trim();
 
-// Fallback URL only for development — do not rely on hardcoded URLs in production
+// Fallback URL only for development -- do not rely on hardcoded URLs in production
 const DEFAULT_SUPABASE_URL = 'https://zcrytpyuxmrnjdbyjhsr.supabase.co';
 
 const finalUrl = SUPABASE_URL || DEFAULT_SUPABASE_URL;
