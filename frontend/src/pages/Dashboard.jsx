@@ -71,6 +71,7 @@ function buildPieStops(statusTotals) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const role = (localStorage.getItem('userRole') || '').toLowerCase();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

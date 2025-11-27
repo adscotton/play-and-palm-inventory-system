@@ -5,6 +5,8 @@ import Header from '../components/Header.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import '../styles/product-detail.css';
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ export default function ProductDetail() {
       try {
         setLoading(true);
         // Fetch from backend
-        const response = await fetch(`http://localhost:4000/api/products/${id}`);
+        const response = await fetch(`${API_BASE}/api/products/${id}`);
         if (!response.ok) {
           setProduct(null);
           return;
@@ -131,12 +133,14 @@ export default function ProductDetail() {
               <div className="product-actions">
                 {isAdminOrManager && (
                   <>
-                    <button onClick={() => navigate(`/product/${product.id}/edit`)} className="btn btn-secondary">Edit</button>
+                    <button onClick={() => navigate(`/product/${product.id}/edit`)} className="btn btn-secondary">Edit Details</button>
+                    <button onClick={() => navigate('/update-stock', { state: { prefillName: product.name } })} className="btn btn-secondary">Update Stock</button>
+                    <button onClick={() => navigate('/update-price', { state: { prefillName: product.name } })} className="btn btn-secondary">Update Price</button>
                     <button className="btn btn-danger" onClick={async () => {
                       if (!confirm('Delete this product?')) return;
                       try {
                         const token = localStorage.getItem('token');
-                        const res = await fetch(`http://localhost:4000/api/products/${product.id}`, {
+                        const res = await fetch(`${API_BASE}/api/products/${product.id}`, {
                           method: 'DELETE',
                           headers: {
                             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -153,7 +157,7 @@ export default function ProductDetail() {
                   </>
                 )}
                 {isStaff && (
-                  <button onClick={() => navigate(`/product/${product.id}/edit`)} className="btn btn-secondary">
+                  <button onClick={() => navigate('/update-stock', { state: { prefillName: product.name } })} className="btn btn-secondary">
                     Update Stock
                   </button>
                 )}

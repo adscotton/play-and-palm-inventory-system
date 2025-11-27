@@ -97,6 +97,14 @@ textarea.form-input {
   margin-bottom: 1rem;
 }
 
+.info-banner {
+  background: #f0f4ff;
+  border: 1px solid #d6e0ff;
+  color: #1f3c88;
+  padding: 0.9rem 1rem;
+  border-radius: 6px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .add-product-container {

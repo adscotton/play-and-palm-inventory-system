@@ -111,6 +111,37 @@ function requireManagerOrAdmin(req, res, next) {
   return res.status(403).json({ error: 'Forbidden: requires manager or admin role' });
 }
 
+// GET /api/products/search?name=foo (auth required)
+router.get('/search', verifyToken, async (req, res) => {
+  const term = (req.query.name || '').trim();
+  if (!term) return res.json([]);
+
+  if (isSupabaseAvailable()) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, brand, category, price, stock, status, sku, manufacturer, release_date, tags, image')
+        .ilike('name', `%${term}%`)
+        .order('name', { ascending: true })
+        .limit(20);
+
+      if (error) throw error;
+      return res.json((data || []).map(shapeProductResponse));
+    } catch (err) {
+      console.error('Supabase search failed:', err.message || err);
+    }
+  }
+
+  try {
+    const items = readProductsLocal();
+    const results = items.filter((p) => normalizeName(p.name).includes(normalizeName(term))).slice(0, 20);
+    return res.json(results);
+  } catch (err) {
+    console.error('Local search failed:', err);
+    return res.status(500).json({ error: 'Failed to search products' });
+  }
+});
+
 // GET /api/products
 router.get('/', async (req, res) => {
   if (isSupabaseAvailable()) {
@@ -252,6 +283,101 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
   } catch (err) {
     console.error('Local POST failed:', err);
     res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+// PUT /api/products/:id/stock (staff/manager/admin)
+router.put('/:id/stock', verifyToken, async (req, res) => {
+  const id = req.params.id;
+  const role = (req.user && req.user.role) || '';
+  if (!['admin', 'manager', 'staff'].includes(role)) {
+    return res.status(403).json({ error: 'Forbidden: requires staff, manager or admin role' });
+  }
+
+  const { stock } = req.body || {};
+  const parsedStock = parseInt(stock, 10);
+  if (!Number.isFinite(parsedStock) || parsedStock < 0) {
+    return res.status(400).json({ error: 'Stock must be a non-negative integer' });
+  }
+  const status = computeStatus(parsedStock);
+
+  if (isSupabaseAvailable()) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .update({ stock: parsedStock, status })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+      if (error) {
+        console.error('Supabase stock update error:', error);
+        return res.status(400).json({ error: error.message || 'Update failed' });
+      }
+      if (!data) return res.status(404).json({ error: 'Product not found' });
+      await logAudit(req.user?.id, data.id, 'UPDATE_STOCK', { stock: parsedStock, status });
+      return res.json(shapeProductResponse(data));
+    } catch (err) {
+      console.error('Supabase stock PUT failed:', err);
+    }
+  }
+
+  // Local fallback
+  try {
+    const items = readProductsLocal();
+    const idx = items.findIndex((p) => String(p.id) === String(id));
+    if (idx === -1) return res.status(404).json({ error: 'Product not found' });
+    items[idx] = { ...items[idx], stock: parsedStock, status };
+    writeProductsLocal(items);
+    await logAudit(req.user?.id, id, 'UPDATE_STOCK', { stock: parsedStock, status });
+    return res.json(items[idx]);
+  } catch (err) {
+    console.error('Local stock PUT failed:', err);
+    res.status(500).json({ error: 'Failed to update stock' });
+  }
+});
+
+// PUT /api/products/:id/price (manager/admin only)
+router.put('/:id/price', verifyToken, requireManagerOrAdmin, async (req, res) => {
+  const id = req.params.id;
+  const { price } = req.body || {};
+  const parsedPrice = parseFloat(price);
+  if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+    return res.status(400).json({ error: 'Price must be a non-negative number' });
+  }
+
+  if (isSupabaseAvailable()) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .update({ price: parsedPrice })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
+      if (error) {
+        console.error('Supabase price update error:', error);
+        return res.status(400).json({ error: error.message || 'Update failed' });
+      }
+      if (!data) return res.status(404).json({ error: 'Product not found' });
+      await logAudit(req.user?.id, data.id, 'UPDATE_PRICE', { price: parsedPrice });
+      return res.json(shapeProductResponse(data));
+    } catch (err) {
+      console.error('Supabase price PUT failed:', err);
+    }
+  }
+
+  // Local fallback
+  try {
+    const items = readProductsLocal();
+    const idx = items.findIndex((p) => String(p.id) === String(id));
+    if (idx === -1) return res.status(404).json({ error: 'Product not found' });
+    items[idx] = { ...items[idx], price: parsedPrice };
+    writeProductsLocal(items);
+    await logAudit(req.user?.id, id, 'UPDATE_PRICE', { price: parsedPrice });
+    return res.json(items[idx]);
+  } catch (err) {
+    console.error('Local price PUT failed:', err);
+    res.status(500).json({ error: 'Failed to update price' });
   }
 });
 

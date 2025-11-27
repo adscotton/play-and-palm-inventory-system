@@ -1,5 +1,5 @@
 // src/pages/EditProduct.jsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -8,7 +8,7 @@ import '../styles/add-product.css';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 const CATEGORY_OPTIONS = ['Console', 'Handheld', 'Games', 'Accessories', 'VR', 'Other'];
 
-function deriveStatus(stock) {
+function computeStatus(stock) {
   const qty = Number(stock) || 0;
   if (qty <= 0) return 'No Stock';
   if (qty <= 5) return 'Low in Stock';
@@ -20,6 +20,9 @@ export default function EditProduct() {
   const navigate = useNavigate();
   const role = (localStorage.getItem('userRole') || '').toLowerCase();
   const isStaff = role === 'staff';
+  const isManagerOrAdmin = role === 'manager' || role === 'admin';
+  const canEditAll = isManagerOrAdmin;
+  const canEditStock = isStaff || isManagerOrAdmin;
   const [formData, setFormData] = useState({
     name: '',
     brand: '',
@@ -37,8 +40,6 @@ export default function EditProduct() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [existingNames, setExistingNames] = useState([]);
-
-  const derivedStatus = useMemo(() => deriveStatus(formData.stock), [formData.stock]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -99,15 +100,23 @@ export default function EditProduct() {
     const token = localStorage.getItem('token');
 
     const issues = [];
-    if (!formData.name.trim()) issues.push('Product name is required.');
-    if (!formData.brand.trim()) issues.push('Brand is required.');
-    if (formData.price === '' || formData.price === null) issues.push('Price is required.');
-    if (formData.price < 0) issues.push('Price cannot be negative.');
-    if (formData.stock === '' || formData.stock === null) issues.push('Stock is required.');
-    if (formData.stock < 0) issues.push('Stock cannot be negative.');
+    if (canEditAll) {
+      if (!formData.name.trim()) issues.push('Product name is required.');
+      if (!formData.brand.trim()) issues.push('Brand is required.');
+    }
+
+    if (canEditStock) {
+      const parsedStock = parseInt(formData.stock, 10);
+      if (!Number.isFinite(parsedStock) || parsedStock < 0) issues.push('Stock must be 0 or greater.');
+    }
+
+    if (canEditAll && formData.price !== '') {
+      const parsedPrice = parseFloat(formData.price);
+      if (!Number.isFinite(parsedPrice) || parsedPrice < 0) issues.push('Price must be 0 or greater.');
+    }
 
     const normalized = (formData.name || '').trim().toLowerCase();
-    if (!isStaff && existingNames.includes(normalized)) {
+    if (canEditAll && existingNames.includes(normalized)) {
       issues.push('Product name already exists.');
     }
 
@@ -117,25 +126,28 @@ export default function EditProduct() {
       return;
     }
 
-    const basePayload = {
-      name: formData.name,
-      brand: formData.brand,
-      category: formData.category,
-      price: parseFloat(formData.price || 0),
-      stock: parseInt(formData.stock || 0),
-      status: derivedStatus,
-      description: formData.description,
-      sku: formData.sku || undefined,
-      manufacturer: formData.manufacturer || undefined,
-      releaseDate: formData.releaseDate || undefined,
-      tags: Array.isArray(formData.tags) ? formData.tags : (formData.tags ? [formData.tags] : []),
-      image: formData.image || undefined,
-    };
+    const basePayload = {};
 
-    // Staff can only adjust stock (status auto derived)
-    const payload = isStaff
-      ? { stock: basePayload.stock, status: derivedStatus }
-      : basePayload;
+    if (canEditAll) {
+      Object.assign(basePayload, {
+        name: formData.name,
+        brand: formData.brand,
+        category: formData.category,
+        price: formData.price === '' ? undefined : parseFloat(formData.price),
+        description: formData.description,
+        sku: formData.sku || undefined,
+        manufacturer: formData.manufacturer || undefined,
+        releaseDate: formData.releaseDate || undefined,
+        tags: Array.isArray(formData.tags) ? formData.tags : (formData.tags ? [formData.tags] : []),
+        image: formData.image || undefined,
+      });
+    }
+
+    if (canEditStock) {
+      const parsedStock = parseInt(formData.stock, 10);
+      basePayload.stock = parsedStock;
+      basePayload.status = computeStatus(parsedStock);
+    }
 
     try {
       const res = await fetch(`${API_BASE}/api/products/${id}`, {
@@ -144,7 +156,7 @@ export default function EditProduct() {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(basePayload),
       });
 
       if (!res.ok) {
@@ -205,23 +217,6 @@ export default function EditProduct() {
                       ))}
                     </select>
                   </div>
-
-                  <div className="form-field">
-                    <label htmlFor="price">Price ($) *</label>
-                    <input id="price" name="price" type="number" step="0.01" value={formData.price} onChange={handleChange} className="form-input" disabled={isStaff} />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-field">
-                    <label htmlFor="stock">Stock Quantity *</label>
-                    <input id="stock" name="stock" type="number" min="0" value={formData.stock} onChange={handleChange} className="form-input" />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Status (auto)</label>
-                    <input type="text" value={derivedStatus} className="form-input" disabled />
-                  </div>
                 </div>
 
                 <div className="form-group">
@@ -255,7 +250,7 @@ export default function EditProduct() {
 
                 <div className="form-actions">
                   <button type="button" onClick={() => navigate(-1)} className="btn btn-secondary">Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
+                  <button type="submit" className="btn btn-primary" disabled={saving || isStaff}>{saving ? 'Saving...' : 'Save Changes'}</button>
                 </div>
               </form>
             </div>
