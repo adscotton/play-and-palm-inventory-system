@@ -8,23 +8,13 @@ import '../styles/dashboard.css';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 const DASH_WIDGETS_KEY = 'dashboard_widgets_v1';
 
-// Sample data so the dashboard still renders when the backend or Supabase is offline.
-const SAMPLE_PRODUCTS = [
-  { id: 1, name: 'DualSense Controller', category: 'Accessories', stock: 42, status: 'Available' },
-  { id: 2, name: 'PS5 Console', category: 'Consoles', stock: 8, status: 'Available' },
-  { id: 3, name: 'Xbox Series X', category: 'Consoles', stock: 4, status: 'Low Stock' },
-  { id: 4, name: 'Nintendo Switch OLED', category: 'Consoles', stock: 0, status: 'Out of Stock' },
-  { id: 5, name: 'Zelda: TOTK', category: 'Games', stock: 16, status: 'Available' },
-  { id: 6, name: 'EA FC 25', category: 'Games', stock: 6, status: 'Available' },
-  { id: 7, name: 'Logitech G Pro Headset', category: 'Accessories', stock: 3, status: 'Low Stock' },
-  { id: 8, name: '8BitDo Ultimate', category: 'Accessories', stock: 0, status: 'Out of Stock' },
-];
-
 const widgetList = [
   { id: 'status', label: 'Inventory Status' },
   { id: 'category', label: 'Stock by Category' },
   { id: 'restock', label: 'Restock Watch' },
   { id: 'recent', label: 'Recent Items' },
+  { id: 'value', label: 'Value by Category' },
+  { id: 'brands', label: 'Top Brands' },
 ];
 
 function computeMetrics(products) {
@@ -33,11 +23,43 @@ function computeMetrics(products) {
   const lowStock = products.filter((p) => Number(p.stock) > 0 && Number(p.stock) <= 5).length;
   const outOfStock = products.filter((p) => !Number(p.stock) || Number(p.stock) <= 0).length;
 
+  let totalValue = 0;
+  let priceSum = 0;
+  let pricedCount = 0;
+
+  const brandTotals = {};
+
   const categoryTotals = products.reduce((acc, p) => {
     const key = p.category || 'Uncategorized';
     acc[key] = (acc[key] || 0) + (Number.isFinite(p.stock) ? Number(p.stock) : 0);
     return acc;
   }, {});
+
+  const categoryValueTotals = products.reduce((acc, p) => {
+    const key = p.category || 'Uncategorized';
+    const price = Number(p.price);
+    const stock = Number(p.stock);
+    const value = Number.isFinite(price) && Number.isFinite(stock) ? price * stock : 0;
+    acc[key] = (acc[key] || 0) + value;
+    totalValue += value;
+
+    if (Number.isFinite(price)) {
+      priceSum += price;
+      pricedCount += 1;
+    }
+
+    const brandKey = p.brand || 'Unknown brand';
+    brandTotals[brandKey] = brandTotals[brandKey] || { units: 0, skus: 0 };
+    brandTotals[brandKey].skus += 1;
+    brandTotals[brandKey].units += Number.isFinite(stock) ? stock : 0;
+
+    return acc;
+  }, {});
+
+  const topBrands = Object.entries(brandTotals)
+    .map(([name, info]) => ({ name, ...info }))
+    .sort((a, b) => b.units - a.units || b.skus - a.skus)
+    .slice(0, 5);
 
   const statusTotals = {
     Available: products.filter((p) => (p.status || '').toLowerCase() === 'available' && Number(p.stock) > 0).length,
@@ -49,7 +71,19 @@ function computeMetrics(products) {
     .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
     .slice(0, 5);
 
-  return { totalProducts, totalUnits, lowStock, outOfStock, categoryTotals, statusTotals, recent };
+  return {
+    totalProducts,
+    totalUnits,
+    lowStock,
+    outOfStock,
+    totalValue,
+    averagePrice: pricedCount ? priceSum / pricedCount : 0,
+    categoryTotals,
+    categoryValueTotals,
+    statusTotals,
+    recent,
+    topBrands,
+  };
 }
 
 function buildPieStops(statusTotals) {
@@ -67,6 +101,12 @@ function buildPieStops(statusTotals) {
     start += angle;
     return stop;
   });
+}
+
+function formatCurrency(val) {
+  const num = Number(val);
+  if (!Number.isFinite(num)) return '—';
+  return `₱${num.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`;
 }
 
 export default function Dashboard() {
@@ -97,8 +137,8 @@ export default function Dashboard() {
         if (!cancelled) setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         if (cancelled) return;
-        setError('Backend offline - showing sample data.');
-        setProducts(SAMPLE_PRODUCTS);
+        setError('Backend offline - no data loaded.');
+        setProducts([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -133,6 +173,8 @@ export default function Dashboard() {
   };
 
   const categoryMax = Math.max(...Object.values(metrics.categoryTotals || {}), 1);
+  const categoryValueMax = Math.max(...Object.values(metrics.categoryValueTotals || {}), 1);
+  const brandMax = Math.max(...(metrics.topBrands || []).map((b) => b.units), 1);
 
   return (
     <div className="app-container">
@@ -202,6 +244,20 @@ export default function Dashboard() {
                 <p className="stat-value">{metrics.outOfStock}</p>
               </div>
             </div>
+            <div className="stat-card">
+              <div className="stat-icon">VAL</div>
+              <div className="stat-meta">
+                <p className="stat-label">Inventory Value</p>
+                <p className="stat-value">{formatCurrency(metrics.totalValue)}</p>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">AVG</div>
+              <div className="stat-meta">
+                <p className="stat-label">Avg Price / SKU</p>
+                <p className="stat-value">{formatCurrency(metrics.averagePrice)}</p>
+              </div>
+            </div>
           </section>
 
           <section className="dashboard-grid">
@@ -259,6 +315,32 @@ export default function Dashboard() {
               </div>
             )}
 
+            {activeWidgets.has('value') && (
+              <div className="card chart-card">
+                <div className="card-header">
+                  <h3>Value by Category</h3>
+                  <p className="card-subtitle">Inventory value (price × stock) per category</p>
+                </div>
+                <div className="chart-body">
+                  <div className="bars">
+                    {Object.entries(metrics.categoryValueTotals).map(([cat, val]) => {
+                      const width = `${Math.max(6, (val / categoryValueMax) * 100)}%`;
+                      return (
+                        <div className="bar-row" key={cat}>
+                          <div className="bar-label">{cat}</div>
+                          <div className="bar-track">
+                            <div className="bar-fill" style={{ width }} />
+                          </div>
+                          <div className="bar-value">{formatCurrency(val)}</div>
+                        </div>
+                      );
+                    })}
+                    {!Object.keys(metrics.categoryValueTotals).length && <p>No categories yet.</p>}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeWidgets.has('restock') && (
               <div className="card chart-card">
                 <div className="card-header">
@@ -282,6 +364,34 @@ export default function Dashboard() {
                     {!products.filter((p) => Number(p.stock) <= 5).length && (
                       <p className="muted">All items are healthy.</p>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeWidgets.has('brands') && (
+              <div className="card chart-card">
+                <div className="card-header">
+                  <h3>Top Brands</h3>
+                  <p className="card-subtitle">Brands ranked by units in stock</p>
+                </div>
+                <div className="chart-body">
+                  <div className="bars">
+                    {metrics.topBrands.map((brand) => {
+                      const width = `${Math.max(6, (brand.units / brandMax) * 100)}%`;
+                      return (
+                        <div className="bar-row" key={brand.name}>
+                          <div className="bar-label">{brand.name}</div>
+                          <div className="bar-track">
+                            <div className="bar-fill" style={{ width }} />
+                          </div>
+                          <div className="bar-value">
+                            {brand.units} units • {brand.skus} SKU{brand.skus === 1 ? '' : 's'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {!metrics.topBrands.length && <p>No brand data available.</p>}
                   </div>
                 </div>
               </div>

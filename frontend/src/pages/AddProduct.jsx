@@ -7,6 +7,7 @@ import '../styles/add-product.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 const CATEGORY_OPTIONS = ['Console', 'Handheld', 'Games', 'Accessories', 'VR', 'Other'];
+const STORAGE_UNITS = ['TB', 'GB', 'MB'];
 
 function deriveStatus(stock) {
   const qty = Number(stock) || 0;
@@ -23,10 +24,11 @@ export default function AddProduct() {
     name: '',
     brand: '',
     category: CATEGORY_OPTIONS[0],
+    storageValue: '',
+    storageUnit: 'GB',
     price: '',
     stock: '',
     description: '',
-    sku: '',
     manufacturer: '',
     releaseDate: '',
     tags: '',
@@ -46,7 +48,10 @@ export default function AddProduct() {
       .catch(() => {});
   }, []);
 
-  const derivedStatus = useMemo(() => deriveStatus(formData.stock), [formData.stock]);
+  const derivedStatus = useMemo(
+    () => (formData.stock === '' ? 'Auto' : deriveStatus(formData.stock)),
+    [formData.stock]
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,10 +66,16 @@ export default function AddProduct() {
     const issues = [];
     if (!formData.name.trim()) issues.push('Product name is required.');
     if (!formData.brand.trim()) issues.push('Brand is required.');
-    if (!formData.price && formData.price !== 0) issues.push('Price is required.');
-    if (formData.price < 0) issues.push('Price cannot be negative.');
-    if (formData.stock === '' || formData.stock === null) issues.push('Stock is required.');
-    if (formData.stock < 0) issues.push('Stock cannot be negative.');
+
+    const parsedPrice = parseFloat(formData.price);
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      issues.push('Price must be a non-negative number.');
+    }
+
+    const parsedStock = formData.stock === '' ? null : parseInt(formData.stock, 10);
+    if (parsedStock !== null && (!Number.isFinite(parsedStock) || parsedStock < 0)) {
+      issues.push('Stock must be 0 or greater.');
+    }
 
     const normalized = (formData.name || '').trim().toLowerCase();
     if (existingNames.includes(normalized)) {
@@ -81,16 +92,18 @@ export default function AddProduct() {
 
     try {
       const token = localStorage.getItem('token');
+      const computedStatus = deriveStatus(parsedStock ?? 0);
       const payload = {
         name: formData.name,
         brand: formData.brand,
         category: formData.category,
-        price: parseFloat(formData.price || 0),
-        stock: parseInt(formData.stock || 0),
-        status: derivedStatus,
+        price: parsedPrice,
+        stock: parsedStock === null ? undefined : parsedStock,
+        status: computedStatus,
         description: formData.description,
-        sku: formData.sku || undefined,
         manufacturer: formData.manufacturer || undefined,
+        edition: formData.edition || undefined,
+        storage: formData.storageValue ? `${formData.storageValue}${formData.storageUnit}` : undefined,
         releaseDate: formData.releaseDate || undefined,
         tags: formData.tags || undefined,
         image: formData.image || undefined,
@@ -128,6 +141,11 @@ export default function AddProduct() {
           <div className="add-product-container">
             <div className="add-product-card">
               <h1 className="add-product-title">Add New Product</h1>
+              <p className="add-product-subtitle">Capture consistent details so pricing, stock, and product data stay synchronized.</p>
+              <div className="info-banner">
+                <span className="pill pill-info">Tip</span>
+                <span>Fields marked * are required. Status updates automatically from stock quantity.</span>
+              </div>
 
               {isStaff && (
                 <div className="error-message">
@@ -199,7 +217,76 @@ export default function AddProduct() {
 
                 <div className="form-row">
                   <div className="form-field">
-                    <label htmlFor="stock">Stock Quantity *</label>
+                    <label htmlFor="storage">Storage</label>
+                    <div className="storage-inputs">
+                      <input
+                        id="storage"
+                        type="number"
+                        name="storageValue"
+                        value={formData.storageValue}
+                        onChange={handleChange}
+                        className="form-input"
+                        placeholder="e.g., 1"
+                        min="0"
+                        step="0.01"
+                      />
+                      <select
+                        name="storageUnit"
+                        value={formData.storageUnit}
+                        onChange={handleChange}
+                        className="form-input storage-unit"
+                      >
+                        {STORAGE_UNITS.map((unit) => (
+                          <option key={unit} value={unit}>{unit}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label htmlFor="edition">Edition / Color</label>
+                    <input
+                      id="edition"
+                      type="text"
+                      name="edition"
+                      value={formData.edition || ''}
+                      onChange={handleChange}
+                      className="form-input"
+                      placeholder="e.g., Midnight Black"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-field">
+                    <label htmlFor="manufacturer">Manufacturer</label>
+                    <input
+                      id="manufacturer"
+                      type="text"
+                      name="manufacturer"
+                      value={formData.manufacturer}
+                      onChange={handleChange}
+                      className="form-input"
+                      placeholder="e.g., Sony Interactive Entertainment"
+                    />
+                  </div>
+
+                  <div className="form-field">
+                    <label htmlFor="releaseDate">Release Date</label>
+                    <input
+                      id="releaseDate"
+                      type="date"
+                      name="releaseDate"
+                      value={formData.releaseDate}
+                      onChange={handleChange}
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-field">
+                    <label htmlFor="stock">Stock Quantity</label>
                     <input
                       id="stock"
                       type="number"
@@ -207,8 +294,8 @@ export default function AddProduct() {
                       value={formData.stock}
                       onChange={handleChange}
                       className="form-input"
-                    min="0"
-                    placeholder="0"
+                      min="0"
+                      placeholder="0"
                     />
                   </div>
 
@@ -221,6 +308,19 @@ export default function AddProduct() {
                       disabled
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="tags">Tags (comma-separated)</label>
+                  <input
+                    id="tags"
+                    type="text"
+                    name="tags"
+                    value={formData.tags}
+                    onChange={handleChange}
+                    className="form-input"
+                    placeholder="console, ps5, bundle"
+                  />
                 </div>
 
                 <div className="form-group">

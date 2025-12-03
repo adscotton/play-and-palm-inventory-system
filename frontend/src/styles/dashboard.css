@@ -5,6 +5,7 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .dashboard-title {
@@ -37,6 +38,7 @@
   background: #fff;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .toggle-label {
@@ -49,6 +51,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  flex: 1;
 }
 
 .toggle-chip {
@@ -113,7 +116,7 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
 }
 
@@ -142,15 +145,16 @@
 
 .chart-body {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
   align-items: center;
   justify-content: space-between;
   padding-top: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .pie {
-  width: 180px;
-  height: 180px;
+  width: clamp(150px, 22vw, 190px);
+  height: clamp(150px, 22vw, 190px);
   border-radius: 50%;
   position: relative;
   box-shadow: inset 0 0 0 1px #e2e8f0, 0 10px 30px rgba(15, 23, 42, 0.08);
@@ -158,7 +162,7 @@
 
 .pie-center {
   position: absolute;
-  inset: 34px;
+  inset: clamp(26px, 16%, 36px);
   border-radius: 50%;
   background: #fff;
   display: grid;
@@ -177,7 +181,7 @@
 .legend-value { color: #475569; font-weight: 600; }
 
 .bars { display: grid; gap: 0.75rem; width: 100%; }
-.bar-row { display: grid; grid-template-columns: 120px 1fr 80px; gap: 0.5rem; align-items: center; }
+.bar-row { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr minmax(90px, 1fr); gap: 0.5rem; align-items: center; }
 .bar-label { color: #0f172a; font-weight: 700; }
 .bar-track { width: 100%; height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
 .bar-fill { height: 100%; background: linear-gradient(90deg, #0acffe, #495aff); border-radius: 999px; }
@@ -228,4 +232,14 @@
   .chart-body { flex-direction: column; align-items: flex-start; }
   .bar-row { grid-template-columns: 1fr; }
   .bars { width: 100%; }
+  .widget-toggle-panel { flex-direction: column; align-items: flex-start; }
+  .toggle-chips { width: 100%; }
+  .legend { width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .dashboard-title { font-size: 1.6rem; }
+  .stat-card { padding: 0.9rem; }
+  .chart-card { padding: 1rem; }
+  .pie { width: 150px; height: 150px; }
 }
