@@ -13,7 +13,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 function formatPrice(val) {
   const num = Number(val);
   if (!Number.isFinite(num)) return 'N/A';
-  return `$${num.toFixed(2)}`;
+  return `₱${num.toFixed(2)}`;
 }
 
 export default function InventoryList() {
@@ -141,18 +141,18 @@ export default function InventoryList() {
               <tbody>
                 {currentItems.map((item) => (
                   <tr key={item.id} className="inventory-row">
-                    <td className="inventory-cell">{item.id}</td>
-                    <td className="inventory-cell">{item.name}</td>
-                    <td className="inventory-cell">{item.brand}</td>
-                    <td className="inventory-cell">{item.category}</td>
-                    <td className="inventory-cell">{formatPrice(item.price)}</td>
-                    <td className="inventory-cell">{item.stock}</td>
-                    <td className="inventory-cell">
+                    <td className="inventory-cell" data-label="ID">{item.id}</td>
+                    <td className="inventory-cell" data-label="Name">{item.name}</td>
+                    <td className="inventory-cell" data-label="Brand">{item.brand}</td>
+                    <td className="inventory-cell" data-label="Category">{item.category}</td>
+                    <td className="inventory-cell" data-label="Price">{formatPrice(item.price)}</td>
+                    <td className="inventory-cell" data-label="Stock">{item.stock}</td>
+                    <td className="inventory-cell" data-label="Status">
                       <span className={`status-badge ${getStatusBadge(item.status)}`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="inventory-cell">
+                    <td className="inventory-cell" data-label="Action">
                       <button
                         onClick={() => navigate(`/product/${item.id}`)}
                         className="inventory-action-button"

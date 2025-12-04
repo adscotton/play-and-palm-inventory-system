@@ -201,7 +201,7 @@ export default function AddProduct() {
                 </div>
 
                   <div className="form-field">
-                    <label htmlFor="price">Price ($) *</label>
+                    <label htmlFor="price">Price (₱) *</label>
                     <input
                       id="price"
                       type="number"

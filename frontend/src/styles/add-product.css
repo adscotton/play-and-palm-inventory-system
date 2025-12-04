@@ -1,25 +1,25 @@
 /* Add/Edit Product Page Styles */
 :root {
-  --ap-bg: #f5f7fb;
-  --ap-card: #ffffff;
-  --ap-border: #d5deed;
-  --ap-text: #0b1224;
-  --ap-subtle: #64748b;
-  --ap-primary: #7c3aed;
-  --ap-accent: #a855f7;
-  --ap-shadow: 0 28px 70px rgba(11, 27, 53, 0.12);
+  --ap-bg: #0f0a1e;
+  --ap-card: #16102b;
+  --ap-border: #261943;
+  --ap-text: #f5f0ff;
+  --ap-subtle: #c3b4e3;
+  --ap-primary: #4c1d95;
+  --ap-accent: #a78bfa;
+  --ap-shadow: 0 28px 70px rgba(6, 2, 18, 0.45);
 }
 
 .add-product-container {
   max-width: 1160px;
   margin: 0 auto;
   padding: 2.5rem 1.4rem 3rem;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.06));
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.18), rgba(15, 10, 30, 0.9));
   border-radius: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ap-border);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 22px 60px rgba(11, 27, 53, 0.12);
+  box-shadow: 0 22px 60px rgba(6, 2, 18, 0.45);
   animation: slideIn 0.4s ease;
 }
 
@@ -28,7 +28,7 @@
   position: absolute;
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle at 22% 18%, rgba(124, 58, 237, 0.2), transparent 50%);
+  background: radial-gradient(circle at 22% 18%, rgba(76, 29, 149, 0.26), transparent 50%);
   top: -140px;
   left: -120px;
   filter: blur(6px);
@@ -39,7 +39,7 @@
   position: absolute;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.16), transparent 45%);
+  background: radial-gradient(circle at 90% 20%, rgba(167, 139, 250, 0.18), transparent 45%);
   top: -120px;
   right: -80px;
   filter: blur(4px);
@@ -50,7 +50,7 @@
   border-radius: 18px;
   padding: 2.25rem;
   box-shadow: var(--ap-shadow);
-  border: 1.4px solid rgba(213, 222, 237, 0.9);
+  border: 1.4px solid var(--ap-border);
   position: relative;
   overflow: hidden;
 }
@@ -115,7 +115,7 @@
 .storage-unit {
   padding: 0.9rem 0.75rem;
   border: 1.6px solid var(--ap-border);
-  background: linear-gradient(135deg, #ffffff, #f3f6fb);
+  background: linear-gradient(135deg, #16102b, #1d1538);
   color: var(--ap-text);
   border-radius: 12px;
   font-weight: 700;
@@ -135,26 +135,26 @@
 }
 
 .error-message {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecdd3;
   padding: 1rem;
-  border: 1px solid #fecdd3;
+  border: 1px solid #fda4af;
   border-radius: 12px;
   margin-bottom: 1rem;
-  box-shadow: 0 12px 30px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 12px 30px rgba(239, 68, 68, 0.28);
 }
 
 .info-banner {
-  background: #f0f9ff;
+  background: rgba(76, 29, 149, 0.16);
   border: 1px solid var(--ap-border);
-  color: #0f172a;
+  color: var(--ap-text);
   padding: 0.95rem 1rem;
   border-radius: 12px;
   margin-bottom: 0.6rem;
   display: flex;
   gap: 0.6rem;
   align-items: center;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(6, 2, 18, 0.35);
 }
 
 .pill {
@@ -166,13 +166,13 @@
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.01em;
-  background: rgba(37, 99, 235, 0.12);
-  color: #0b1224;
+  background: rgba(167, 139, 250, 0.14);
+  color: var(--ap-text);
 }
 
 .pill-info {
-  background: rgba(34, 197, 94, 0.14);
-  color: #0f172a;
+  background: rgba(52, 211, 153, 0.14);
+  color: #befae0;
 }
 
 @keyframes slideIn {

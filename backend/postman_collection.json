@@ -39,7 +39,7 @@
       "request": {
         "method": "POST",
         "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"sku\": \"TP-001\",\n  \"name\": \"Test Product\",\n  \"brand\": \"ExampleBrand\",\n  \"manufacturer\": \"ExampleCo\",\n  \"category\": \"Accessory\",\n  \"price\": 9.99,\n  \"stock\": 10,\n  \"status\": \"active\",\n  \"description\": \"Sample product for testing.\"\n}" },
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Product\",\n  \"brand\": \"ExampleBrand\",\n  \"manufacturer\": \"ExampleCo\",\n  \"storage\": \"1TB\",\n  \"edition\": \"Launch Black\",\n  \"category\": \"Accessory\",\n  \"price\": 9.99,\n  \"stock\": 10,\n  \"description\": \"Sample product for testing.\"\n}" },
         "url": { "raw": "{{baseUrl}}/api/products", "host": ["{{baseUrl}}"], "path": ["api","products"] }
       }
     },

@@ -6,6 +6,7 @@ export default function Sidebar() {
   const role = (localStorage.getItem('userRole') || '').toLowerCase();
   const canStockUpdate = ['staff', 'manager', 'admin'].includes(role);
   const canPriceUpdate = role === 'manager' || role === 'admin';
+  const showUpdateNav = canStockUpdate || canPriceUpdate;
   
   const handleLogout = () => {
     localStorage.removeItem('userRole');
@@ -18,8 +19,7 @@ export default function Sidebar() {
   const navItems = [
     { label: 'Home', route: '/dashboard' },
     { label: 'Records', route: '/inventory' },
-    ...(canStockUpdate ? [{ label: 'Update Stock', route: '/update-stock' }] : []),
-    ...(canPriceUpdate ? [{ label: 'Update Price', route: '/update-price' }] : []),
+    ...(showUpdateNav ? [{ label: 'Update Stock & Price', route: '/updates' }] : []),
     ...(role === 'admin' ? [{ label: 'Create User', route: '/users/new' }] : []),
     { label: 'About', route: '/about' },
     { label: 'Account', route: '/account' },

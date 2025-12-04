@@ -115,13 +115,46 @@ export default function ProductDetail() {
                 </div>
 
                 <div className="product-info-group">
-                  <label className="product-label">Price</label>
-                  <p className="product-value">${product.price?.toFixed(2) || 'N/A'}</p>
+                  <label className="product-label">Price (₱)</label>
+                  <p className="product-value">₱{Number.isFinite(Number(product.price)) ? Number(product.price).toFixed(2) : 'N/A'}</p>
                 </div>
 
                 <div className="product-info-group">
                   <label className="product-label">Stock Available</label>
-                  <p className="product-value">{product.stock} units</p>
+                  <p className="product-value">{product.stock ?? '0'} units</p>
+                </div>
+
+                <div className="product-info-group">
+                  <label className="product-label">Storage</label>
+                  <p className="product-value">{product.storage || 'N/A'}</p>
+                </div>
+
+                <div className="product-info-group">
+                  <label className="product-label">Edition / Color</label>
+                  <p className="product-value">{product.edition || 'N/A'}</p>
+                </div>
+
+                <div className="product-info-group">
+                  <label className="product-label">Manufacturer</label>
+                  <p className="product-value">{product.manufacturer || 'N/A'}</p>
+                </div>
+
+                <div className="product-info-group">
+                  <label className="product-label">Release Date</label>
+                  <p className="product-value">{product.release_date || product.releaseDate || 'N/A'}</p>
+                </div>
+
+                <div className="product-info-group">
+                  <label className="product-label">Tags</label>
+                  {Array.isArray(product.tags) && product.tags.length ? (
+                    <div className="tag-list">
+                      {product.tags.map((tag) => (
+                        <span key={tag} className="tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="product-value">{product.tags || 'None'}</p>
+                  )}
                 </div>
 
                 <div className="product-info-group">
@@ -134,8 +167,9 @@ export default function ProductDetail() {
                 {isAdminOrManager && (
                   <>
                     <button onClick={() => navigate(`/product/${product.id}/edit`)} className="btn btn-secondary">Edit Details</button>
-                    <button onClick={() => navigate('/update-stock', { state: { prefillName: product.name } })} className="btn btn-secondary">Update Stock</button>
-                    <button onClick={() => navigate('/update-price', { state: { prefillName: product.name } })} className="btn btn-secondary">Update Price</button>
+                    <button onClick={() => navigate('/updates', { state: { prefillName: product.name, tab: 'stock' } })} className="btn btn-secondary">Update Stock</button>
+                    <button onClick={() => navigate('/updates', { state: { prefillName: product.name, tab: 'reduce' } })} className="btn btn-secondary">Reduce Stock</button>
+                    <button onClick={() => navigate('/updates', { state: { prefillName: product.name, tab: 'price' } })} className="btn btn-secondary">Update Price</button>
                     <button className="btn btn-danger" onClick={async () => {
                       if (!confirm('Delete this product?')) return;
                       try {
@@ -157,7 +191,7 @@ export default function ProductDetail() {
                   </>
                 )}
                 {isStaff && (
-                  <button onClick={() => navigate('/update-stock', { state: { prefillName: product.name } })} className="btn btn-secondary">
+                  <button onClick={() => navigate('/updates', { state: { prefillName: product.name, tab: 'stock' } })} className="btn btn-secondary">
                     Update Stock
                   </button>
                 )}

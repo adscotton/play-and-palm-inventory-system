@@ -1,1 +1,26 @@
-INSERT INTO "public"."products" ("id", "sku", "name", "brand", "category", "manufacturer", "price", "stock", "status", "description", "release_date", "tags", "image", "created_at", "updated_at") VALUES ('1', 'PS5-DISC', 'PlayStation 5', 'Sony', 'Console', 'Sony', '499.00', '8', 'Available', 'Disc edition console', '2020-11-12', '"{\"console\",\"next-gen\"]}', null, '2025-11-24 13:43:55.814268+00', '2025-11-24 13:43:55.814268+00'), ('2', 'XSX-001', 'Xbox Series X', 'Microsoft', 'Console', 'Microsoft', '499.00', '3', 'Low in Stock', 'Flagship Xbox console', '2020-11-10', '"{\"console\",\"flagship\"]}', null, '2025-11-24 13:43:55.814268+00', '2025-11-24 13:43:55.814268+00'), ('3', 'PS-DS-CT12', 'Dualshock Controller', 'Sony', 'Accessories', 'Hori', '10.00', '10', 'Available', 'Description', null, '"{\"HelloWoopaksdo\"]}', null, '2025-11-24 13:45:48.746398+00', '2025-11-24 13:46:22.990072+00'), ('4', null, 'Test4', 'Sony', 'Console', null, '99.99', '1', 'Low in Stock', null, null, null, null, '2025-11-24 15:26:26.543022+00', '2025-11-24 15:26:26.543022+00');
+INSERT INTO "public"."products" (
+  "id",
+  "name",
+  "brand",
+  "category",
+  "manufacturer",
+  "storage",
+  "edition",
+  "price",
+  "stock",
+  "status",
+  "description",
+  "release_date",
+  "tags",
+  "image",
+  "created_at",
+  "updated_at"
+) VALUES
+  ('1', 'PlayStation 5 Disc', 'Sony', 'Console', 'Sony Interactive Entertainment', '825GB SSD', 'Launch Disc (White)', '499.00', '8', 'Available', 'Disc edition console', '2020-11-12', '{"console","next-gen"}', null, now(), now()),
+  ('2', 'Xbox Series X', 'Microsoft', 'Console', 'Microsoft', '1TB SSD', 'Standard Black', '499.00', '3', 'Low in Stock', 'Flagship Xbox console', '2020-11-10', '{"console","flagship"}', null, now(), now()),
+  ('3', 'Nintendo Switch OLED', 'Nintendo', 'Console', 'Nintendo Co., Ltd.', '64GB eMMC', 'White Joy-Con', '349.00', '6', 'Available', 'OLED model', '2021-10-08', '{"console","oled"}', null, now(), now()),
+  ('4', 'DualSense Controller', 'Sony', 'Controller', 'Sony Interactive Entertainment', null, 'White', '69.00', '15', 'Available', 'Wireless controller', null, '{"controller","ps5"}', null, now(), now()),
+  ('5', 'Xbox Wireless Controller', 'Microsoft', 'Controller', 'Microsoft', null, 'Electric Volt', '64.99', '10', 'Available', 'BT controller', null, '{"controller","xbox"}', null, now(), now()),
+  ('6', 'Seagate Expansion Card', 'Seagate', 'Storage', 'Seagate Technology', '1TB NVMe', 'Xbox Official', '219.99', '5', 'Low in Stock', 'Storage expansion', null, '{"storage","xbox"}', null, now(), now()),
+  ('7', 'WD Black C50 Expansion', 'Western Digital', 'Storage', 'Western Digital', '1TB NVMe', 'Xbox Official', '189.99', '7', 'Available', 'Storage expansion', null, '{"storage","xbox"}', null, now(), now()),
+  ('8', 'PS5 Pulse 3D Headset', 'Sony', 'Headset', 'Sony Interactive Entertainment', null, 'White', '99.99', '12', 'Available', 'Wireless headset', null, '{"headset","ps5"}', null, now(), now());

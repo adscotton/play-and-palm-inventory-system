@@ -9,6 +9,8 @@ const router = express.Router();
 const DB_PATH = path.join(__dirname, '..', 'database', 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 const SUPABASE_USERS_TABLE = 'app_users';
+const SUPABASE_TIMEOUT_MS = parseInt(process.env.SUPABASE_TIMEOUT_MS || '2000', 10);
+const SELECT_USER = 'id, username, email, first_name, last_name, role, contact_number, location, created_at';
 const AUDIT_TABLE = 'audit_logs';
 
 function ensureUsersFile() {
@@ -47,6 +49,21 @@ async function logAudit(userId, targetId, action, details = {}) {
   }
 }
 
+function mapSupabaseUser(row) {
+  if (!row) return row;
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    first_name: row.first_name,
+    last_name: row.last_name,
+    role: row.role || null,
+    contact_number: row.contact_number,
+    location: row.location,
+    created_at: row.created_at,
+  };
+}
+
 function verifyToken(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth) return res.status(401).json({ error: 'Authorization header missing' });
@@ -68,18 +85,27 @@ function requireManagerOrAdmin(req, res, next) {
   return res.status(403).json({ error: 'Forbidden: requires manager or admin role' });
 }
 
+function withTimeout(promise, ms, label = 'operation') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 // GET current user (uses local JWT payload or Supabase if configured)
 router.get('/me', verifyToken, async (req, res) => {
   try {
     if (hasSupabaseKey && supabase) {
       const { id, username } = req.user || {};
-      let query = supabase.from(SUPABASE_USERS_TABLE).select('id, username, email, first_name, last_name, role, contact_number, location, created_at');
+      let query = supabase.from(SUPABASE_USERS_TABLE).select(SELECT_USER);
       if (id) query = query.eq('id', id).limit(1).maybeSingle();
       else if (username) query = query.ilike('username', username).limit(1).maybeSingle();
-      const { data, error } = await query;
+      const { data, error } = await withTimeout(query, SUPABASE_TIMEOUT_MS, 'Supabase user me');
       if (error) throw error;
       if (!data) return res.status(404).json({ error: 'User not found' });
-      return res.json(data);
+      return res.json(mapSupabaseUser(data));
     }
     const users = readUsersLocal();
     const user = users.find((u) => u.id === req.user.id);
@@ -121,22 +147,15 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
     };
 
     if (hasSupabaseKey && supabase) {
-      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE).insert([supabasePayload]).select().single();
+      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE)
+        .insert([supabasePayload])
+        .select(SELECT_USER)
+        .single();
       if (error) {
         throw error;
       }
-      const returned = {
-        id: data.id || null,
-        username: localUser.username,
-        firstName: data.first_name || localUser.firstName,
-        lastName: data.last_name || localUser.lastName,
-        email: data.email || localUser.email,
-        role: data.role || localUser.role,
-        contactNumber: data.contact_number || localUser.contactNumber,
-        location: data.location || localUser.location,
-        created_at: data.created_at || supabasePayload.created_at
-      };
-      await logAudit(req.user?.id, data.id, 'CREATE', { username: data.username, role: data.role });
+      const returned = mapSupabaseUser(data);
+      await logAudit(req.user?.id, data.id, 'CREATE', { username: data.username, role: returned.role });
       return res.status(201).json(returned);
     }
 
@@ -168,9 +187,19 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
 router.get('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
   try {
     if (hasSupabaseKey && supabase) {
-      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE).select('id, username, email, first_name, last_name, role, contact_number, location, created_at').order('id', { ascending: true });
+      let data = null;
+      let error = null;
+      try {
+        ({ data, error } = await withTimeout(
+          supabase.from(SUPABASE_USERS_TABLE).select(SELECT_USER).order('id', { ascending: true }),
+          SUPABASE_TIMEOUT_MS,
+          'Supabase list users'
+        ));
+      } catch (err) {
+        console.warn(err.message);
+      }
       if (error) throw error;
-      return res.json(data);
+      return res.json((data || []).map(mapSupabaseUser));
     }
     const users = readUsersLocal();
     return res.json(users.map(u => ({ id: u.id, username: u.username, email: u.email, firstName: u.firstName, lastName: u.lastName, role: u.role, contactNumber: u.contactNumber, location: u.location })));
@@ -204,10 +233,19 @@ router.put('/:id', verifyToken, async (req, res) => {
     };
 
     if (hasSupabaseKey && supabase) {
-      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE).update(updates).eq('id', id).select().single();
+      const supabaseUpdates = { ...updates };
+      if (supabaseUpdates.role) {
+        supabaseUpdates.role = supabaseUpdates.role;
+      }
+
+      const { data, error } = await supabase.from(SUPABASE_USERS_TABLE)
+        .update(supabaseUpdates)
+        .eq('id', id)
+        .select(SELECT_USER)
+        .single();
       if (error) throw error;
       await logAudit(req.user?.id, id, 'UPDATE', { updates });
-      return res.json(data);
+      return res.json(mapSupabaseUser(data));
     }
 
     const users = readUsersLocal();

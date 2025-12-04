@@ -11,6 +11,7 @@ import Account from './pages/Account.jsx';
 import CreateUser from './pages/CreateUser.jsx';
 import UpdateStock from './pages/UpdateStock.jsx';
 import UpdatePrice from './pages/UpdatePrice.jsx';
+import UpdateAdjust from './pages/UpdateAdjust.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/account" element={<Account />} />
           <Route path="/users/new" element={<CreateUser />} />
+          <Route path="/updates" element={<UpdateAdjust />} />
           <Route path="/update-stock" element={<UpdateStock />} />
           <Route path="/update-price" element={<UpdatePrice />} />
         </Route>

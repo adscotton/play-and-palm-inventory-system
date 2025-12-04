@@ -1,21 +1,28 @@
-/* Account page styles */
+/* Account page styles - lighter purple theme */
 .account-main {
   max-width: 980px;
   margin: 2rem auto;
-  padding: 1.25rem 2rem;
-  background: radial-gradient(circle at 10% 10%, rgba(126, 34, 206, 0.14), transparent 35%),
-              linear-gradient(145deg, #0b0b16 0%, #1a1030 45%, #120b26 100%);
-  border-radius: 18px;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  padding: 1.5rem 2rem;
+  background: radial-gradient(circle at 10% 10%, rgba(76, 29, 149, 0.18), transparent 40%),
+              linear-gradient(135deg, #16102b 0%, #1f163b 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(6, 2, 18, 0.45);
+  border: 1.5px solid #261943;
+  color: #f5f0ff;
 }
 
 .account-title {
-  font-size: 1.85rem;
-  color: #ede9fe;
-  margin-bottom: 1rem;
+  font-size: 1.95rem;
+  color: #f5f0ff;
+  margin-bottom: 0.4rem;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
+}
+
+.account-subtitle {
+  margin: 0 0 1rem 0;
+  color: #c3b4e3;
+  font-weight: 600;
 }
 
 .account-form .form-row {
@@ -28,6 +35,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
 }
 
 .account-form .form-field.full {
@@ -36,83 +44,86 @@
 
 .account-form label {
   font-weight: 700;
-  margin-bottom: 0.35rem;
-  color: #d9d6f9;
+  color: #f5f0ff;
 }
 
 .account-form input,
 .account-form select,
 .account-form textarea {
-  padding: 0.7rem 0.85rem;
-  border-radius: 10px;
-  border: 1px solid #3a2f59;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 2.4px solid #261943;
   font-size: 1rem;
-  background: linear-gradient(180deg, #1c1633 0%, #141025 100%);
-  color: #f8fafc;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  background: linear-gradient(135deg, #16102b, #1d1538);
+  color: #f5f0ff;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.1s ease;
+  box-shadow: 0 1px 3px rgba(6, 2, 18, 0.4);
 }
 
 .account-form input:focus,
 .account-form select:focus,
 .account-form textarea:focus {
   outline: none;
-  border-color: #a855f7;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+  border-color: #4c1d95;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25);
+  transform: translateY(-1px);
 }
 
 .account-form input:disabled,
 .account-form select:disabled,
 .account-form textarea:disabled {
-  opacity: 0.8;
+  opacity: 0.75;
   cursor: not-allowed;
 }
 
 .account-form select option {
-  background: #0f0b1e;
-  color: #f8fafc;
+  background: #0f0a1e;
+  color: #f5f0ff;
 }
 
 .form-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
 }
 
 .form-error {
-  background-color: #4c1d95;
-  color: #f5e1ff;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #a855f7;
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #fecdd3;
+  padding: 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #fda4af;
   margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(12, 10, 22, 0.8);
+  background: rgba(12, 10, 22, 0.55);
   display: grid;
   place-items: center;
   z-index: 1000;
 }
 
 .modal-card {
-  background: linear-gradient(160deg, #1b1430 0%, #0f0b1e 100%);
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
+  background: #16102b;
+  border-radius: 16px;
+  padding: 1.4rem 1.6rem;
   width: min(420px, 90vw);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
-  border: 1px solid #6d28d9;
+  box-shadow: 0 24px 48px rgba(6, 2, 18, 0.55);
+  border: 1.5px solid #261943;
+  color: #f5f0ff;
 }
 
 .modal-card h3 {
   margin: 0 0 0.35rem 0;
-  color: #f8fafc;
+  color: #f5f0ff;
 }
 
 .modal-card p {
   margin: 0 0 0.75rem 0;
-  color: #d9d6f9;
+  color: #c3b4e3;
 }
 
 .modal-actions {
@@ -127,7 +138,7 @@
   }
 
   .account-main {
-    padding: 1rem;
+    padding: 1.1rem;
     margin: 1rem;
   }
 }

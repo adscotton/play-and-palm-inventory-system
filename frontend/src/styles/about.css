@@ -3,19 +3,20 @@
   display: grid;
   grid-template-columns: 2fr 1.4fr;
   gap: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #261943;
   border-radius: 16px;
-  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+  background: linear-gradient(135deg, #16102b 0%, #1f163b 100%);
+  box-shadow: 0 16px 40px rgba(6, 2, 18, 0.45);
   padding: 1.5rem 1.75rem;
   margin-bottom: 1.5rem;
+  color: #f5f0ff;
 }
 
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
-  color: #6366f1;
+  color: #a78bfa;
   font-size: 0.75rem;
   margin: 0 0 0.35rem 0;
 }
@@ -24,12 +25,12 @@
   margin: 0 0 0.5rem 0;
   font-size: 2rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #f5f0ff;
 }
 
 .about-description {
   margin: 0;
-  color: #475569;
+  color: #c3b4e3;
   line-height: 1.6;
   font-size: 1rem;
 }
@@ -41,37 +42,37 @@
 }
 
 .pillar {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: #17102d;
+  border: 1px solid #261943;
   border-radius: 12px;
   padding: 0.9rem 1rem;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(6, 2, 18, 0.35);
 }
 
 .pillar-title {
   margin: 0;
-  color: #0f172a;
+  color: #f5f0ff;
   font-weight: 800;
 }
 
 .pillar-copy {
   margin: 0.25rem 0 0 0;
-  color: #475569;
+  color: #c3b4e3;
   line-height: 1.5;
 }
 
 .about-section {
   margin-bottom: 1.25rem;
   padding: 1.25rem 1.4rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #261943;
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  background: #17102d;
+  box-shadow: 0 10px 28px rgba(6, 2, 18, 0.35);
 }
 
 .about-section h2 {
   margin: 0 0 0.65rem 0;
-  color: #0f172a;
+  color: #f5f0ff;
   font-size: 1.25rem;
   font-weight: 800;
 }
@@ -86,12 +87,12 @@
 
 .features-list li {
   padding: 0.8rem 0.9rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #17102d;
+  border: 1px solid #261943;
   border-radius: 10px;
-  color: #0f172a;
+  color: #f5f0ff;
   font-weight: 600;
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 6px 14px rgba(6, 2, 18, 0.35);
 }
 
 .team-section {
@@ -107,14 +108,14 @@
 
 .team-title {
   margin: 0;
-  color: #0f172a;
+  color: #f5f0ff;
   font-size: 1.5rem;
   font-weight: 800;
 }
 
 .team-description {
   margin: 0.35rem 0 0 0;
-  color: #475569;
+  color: #c3b4e3;
   line-height: 1.5;
 }
 
@@ -129,10 +130,10 @@
   grid-template-columns: auto 1fr;
   gap: 0.75rem;
   padding: 1rem 1.1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #261943;
   border-radius: 12px;
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  background: linear-gradient(145deg, #16102b 0%, #1f163b 100%);
+  box-shadow: 0 12px 28px rgba(6, 2, 18, 0.45);
   align-items: center;
 }
 
@@ -143,9 +144,9 @@
   display: grid;
   place-items: center;
   font-weight: 800;
-  color: #0f172a;
-  background: linear-gradient(135deg, #a5b4fc, #c7d2fe);
-  border: 1px solid #e2e8f0;
+  color: #f5f0ff;
+  background: linear-gradient(135deg, #4c1d95, #2e1065);
+  border: 1px solid #261943;
 }
 
 .team-text { display: grid; gap: 0.2rem; }
@@ -154,19 +155,19 @@
   margin: 0;
   font-size: 1.05rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #f5f0ff;
 }
 
 .team-member-role {
   margin: 0;
-  color: #6366f1;
+  color: #a78bfa;
   font-weight: 700;
   font-size: 0.95rem;
 }
 
 .team-member-bio {
   margin: 0;
-  color: #475569;
+  color: #c3b4e3;
   font-size: 0.9rem;
   line-height: 1.4;
 }

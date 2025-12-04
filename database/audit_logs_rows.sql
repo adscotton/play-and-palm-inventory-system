@@ -1,1 +1,12 @@
-INSERT INTO "public"."audit_logs" ("id", "user_id", "entity_type", "entity_id", "action", "details", "created_at") VALUES ('1', '1', 'product', '3', 'CREATE', '{"sku":null,"name":"Dualshock Controller","stock":10}', '2025-11-24 13:45:49.294359+00'), ('2', '1', 'product', '3', 'UPDATE', '{"updates":{"sku":"PS-DS-CT12","name":"Dualshock Controller","tags":["HelloWoopaksdo"],"brand":"Sony","price":10,"stock":10,"status":"Available","category":"Accessories","description":"Description","manufacturer":"Hori"}}', '2025-11-24 13:46:23.218857+00'), ('3', '1', 'product', '4', 'CREATE', '{"sku":null,"name":"Test4","stock":1}', '2025-11-24 15:26:26.863015+00');
+INSERT INTO "public"."audit_logs" (
+  "id",
+  "user_id",
+  "entity_type",
+  "entity_id",
+  "action",
+  "details",
+  "created_at"
+) VALUES
+  ('1', '1', 'product', '1', 'CREATE', '{"name":"PlayStation 5 Disc","stock":8}', now()),
+  ('2', '1', 'product', '1', 'UPDATE_PRICE', '{"price":499.00}', now()),
+  ('3', '2', 'product', '2', 'UPDATE_STOCK', '{"stock":5,"status":"Low in Stock","username":"staff"}', now());

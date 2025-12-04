@@ -1,0 +1,230 @@
+/* Add/Edit Product Page Styles */
+:root {
+  --ap-bg: #f5f6fb;
+  --ap-card: #ffffff;
+  --ap-border: #d9dffa;
+  --ap-text: #0f172a;
+  --ap-subtle: #6b7280;
+  --ap-primary: #7c3aed;
+  --ap-primary-dark: #6a21c9;
+  --ap-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+.add-product-container {
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+  background: radial-gradient(circle at 15% 20%, rgba(124, 58, 237, 0.08), transparent 45%), var(--ap-bg);
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+}
+
+.add-product-card {
+  background: var(--ap-card);
+  border-radius: 18px;
+  padding: 2.4rem;
+  box-shadow: var(--ap-shadow);
+  border: 1.5px solid rgba(124, 58, 237, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.add-product-card::after {
+  content: '';
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.08), transparent 65%);
+  top: -120px;
+  right: -120px;
+}
+
+.add-product-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ap-subtle);
+}
+
+.add-product-title {
+  font-size: 2.1rem;
+  color: var(--ap-text);
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.add-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.form-group,
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-group label,
+.form-field label {
+  font-weight: 700;
+  color: var(--ap-text);
+  font-size: 0.95rem;
+}
+
+.form-input {
+  padding: 0.9rem 1rem;
+  border: 2.4px solid #d8b4fe;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  background: linear-gradient(135deg, #faf5ff, #f3f0ff);
+  color: #0f172a;
+}
+
+.form-input:focus,
+.form-input:focus-visible {
+  outline: none;
+  border-color: var(--ap-primary);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.18);
+  transform: translateY(-1px);
+}
+
+/* Ensure selects match input styling */
+select.form-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(135deg, #faf5ff, #f3f0ff);
+  background-position: right 1rem center;
+  background-repeat: no-repeat;
+  padding-right: 2.5rem;
+  color: #0f172a;
+}
+
+select.form-input option {
+  color: #0f172a;
+  background: #ffffff;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
+
+.form-actions .btn {
+  min-width: 160px;
+  padding: 0.9rem 1.5rem;
+  font-weight: 700;
+}
+
+.error-message {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  padding: 1rem;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.info-banner {
+  background: #f0edff;
+  border: 1px solid var(--ap-border);
+  color: #4338ca;
+  padding: 0.95rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
+}
+
+.storage-inputs {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.6rem;
+}
+
+.storage-unit {
+  padding: 0.9rem 0.75rem;
+  border: 2.4px solid #d8b4fe;
+  background: linear-gradient(135deg, #faf5ff, #f3f0ff);
+  color: var(--ap-text);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.pill-info {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.pill-info.subtle {
+  background: #f5f3ff;
+  color: #6b21a8;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .add-product-container {
+    padding: 1.25rem;
+  }
+
+  .add-product-card {
+    padding: 1.75rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .add-product-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 540px) {
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}

@@ -3,6 +3,11 @@
   min-height: 100%;
 }
 
+body {
+  background: #0f0a1e;
+  color: #f5f0ff;
+}
+
 /* Layout Structure */
 .app-container {
   display: flex;
@@ -24,7 +29,7 @@
 .app-container::before {
   width: 520px;
   height: 520px;
-  background: radial-gradient(circle at 30% 30%, rgba(124, 58, 237, 0.22), transparent 65%);
+  background: radial-gradient(circle at 30% 30%, rgba(76, 29, 149, 0.32), transparent 65%);
   top: -140px;
   left: -180px;
 }
@@ -32,7 +37,7 @@
 .app-container::after {
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle at 70% 20%, rgba(168, 85, 247, 0.22), transparent 65%);
+  background: radial-gradient(circle at 70% 20%, rgba(167, 139, 250, 0.26), transparent 65%);
   top: -80px;
   right: -120px;
 }
@@ -49,7 +54,7 @@
   flex-direction: column;
   min-height: 100vh;
   margin-left: 262px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(249, 247, 255, 0.92) 50%, rgba(245, 240, 255, 0.95) 100%);
+  background: linear-gradient(180deg, rgba(12, 8, 26, 0.96) 0%, rgba(14, 10, 29, 0.94) 50%, rgba(18, 13, 36, 0.96) 100%);
   position: relative;
   z-index: 1;
   backdrop-filter: blur(6px);
@@ -71,18 +76,18 @@
 
 /* Cards */
 .card {
-  background: linear-gradient(145deg, #ffffff 0%, #f7f9fc 100%);
+  background: linear-gradient(145deg, #16102b 0%, #1f163b 100%);
   border-radius: 14px;
   padding: 1.5rem;
-  box-shadow: 0 18px 42px rgba(12, 29, 53, 0.12);
+  box-shadow: 0 18px 42px rgba(6, 2, 18, 0.45);
   margin-bottom: 1.25rem;
   transition: transform 0.18s ease, box-shadow 0.25s ease;
-  border: 1px solid rgba(210, 221, 238, 0.8);
+  border: 1px solid rgba(38, 25, 67, 0.9);
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 24px 52px rgba(12, 29, 53, 0.15);
+  box-shadow: 0 24px 52px rgba(6, 2, 18, 0.55);
 }
 
 /* Animations */

@@ -1,29 +1,30 @@
 .updates-content {
-  background: radial-gradient(circle at 18% 18%, rgba(124, 58, 237, 0.08), transparent 42%), #f5f7fb;
+  background: radial-gradient(circle at 18% 18%, rgba(76, 29, 149, 0.18), transparent 42%), #0f0a1e;
   border-radius: 20px;
   padding: 2rem;
 }
 
 .update-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f6f9ff 100%);
+  background: linear-gradient(145deg, #16102b 0%, #1f163b 100%);
   border-radius: 20px;
-  box-shadow: 0 18px 50px rgba(11, 27, 53, 0.15);
+  box-shadow: 0 18px 50px rgba(6, 2, 18, 0.5);
   padding: 28px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  border: 1.5px solid #d5deed;
+  border: 1.5px solid #261943;
   position: relative;
   overflow: hidden;
   animation: raiseIn 0.35s ease;
+  color: #f5f0ff;
 }
 
 .update-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 12% 12%, rgba(124, 58, 237, 0.15), transparent 40%),
-    radial-gradient(circle at 85% 0%, rgba(168, 85, 247, 0.12), transparent 40%);
+  background: radial-gradient(circle at 12% 12%, rgba(76, 29, 149, 0.2), transparent 40%),
+    radial-gradient(circle at 85% 0%, rgba(167, 139, 250, 0.16), transparent 40%);
   pointer-events: none;
 }
 
@@ -58,12 +59,12 @@
   justify-content: center;
   gap: 0.65rem;
   padding: 0.65rem 0.85rem;
-  background: linear-gradient(135deg, #f2eafe, #ece4ff);
-  border: 1.8px solid #d5deed;
+  background: linear-gradient(135deg, #1a1235, #120d26);
+  border: 1.8px solid #261943;
   border-radius: 18px;
   margin: 12px auto 2px;
   min-width: 660px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 12px 28px rgba(11, 27, 53, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 28px rgba(6, 2, 18, 0.45);
 }
 
 .update-tab {
@@ -78,29 +79,29 @@
   gap: 4px;
   font-weight: 800;
   transition: all 0.2s ease;
-  color: #0f172a;
+  color: #f0eaff;
   min-width: 180px;
 }
 
 .update-tab small {
   font-weight: 600;
-  color: #6b7280;
+  color: #c3b4e3;
 }
 
 .update-tab:hover:not(.active):not(.disabled) {
-  background: rgba(124, 58, 237, 0.08);
-  border-color: #d5deed;
+  background: rgba(76, 29, 149, 0.16);
+  border-color: #261943;
 }
 
 .update-tab:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline: 3px solid rgba(167, 139, 250, 0.25);
   outline-offset: 2px;
 }
 
 .update-tab.active {
-  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  background: linear-gradient(135deg, #4c1d95, #2e1065);
   color: #fefeff;
-  box-shadow: 0 14px 26px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 14px 26px rgba(46, 16, 101, 0.45);
   transform: translateY(-1px);
   border-color: rgba(255, 255, 255, 0.18);
 }
@@ -116,11 +117,11 @@
 }
 
 .update-panel {
-  border: 1.8px solid #d5deed;
+  border: 1.8px solid #261943;
   border-radius: 16px;
   padding: 18px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(255, 255, 255, 0.9));
-  box-shadow: 0 14px 32px rgba(11, 27, 53, 0.12);
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.16), rgba(12, 8, 26, 0.9));
+  box-shadow: 0 14px 32px rgba(6, 2, 18, 0.45);
   position: relative;
   overflow: hidden;
 }
@@ -129,7 +130,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.08), transparent 35%);
+  background: radial-gradient(circle at 85% 15%, rgba(167, 139, 250, 0.12), transparent 35%);
   pointer-events: none;
 }
 
@@ -137,38 +138,39 @@
   font-weight: 700;
   margin-bottom: 6px;
   display: block;
-  color: #0f172a;
+  color: #f5f0ff;
 }
 
 .form-input {
   width: 100%;
   padding: 12px;
   border-radius: 12px;
-  border: 1.6px solid #d5deed;
+  border: 1.6px solid #261943;
   font-size: 14px;
-  background: linear-gradient(135deg, #ffffff, #f6f0ff);
+  background: linear-gradient(135deg, #16102b, #1d1538);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  color: #f5f0ff;
 }
 
 .form-input:focus,
 .form-input:focus-visible {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3.5px rgba(124, 58, 237, 0.18);
+  border-color: #4c1d95;
+  box-shadow: 0 0 0 3.5px rgba(167, 139, 250, 0.25);
   transform: translateY(-1px);
 }
 
 .search-results {
   margin-top: 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #261943;
   border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: #120d23;
   max-height: 280px;
   overflow-y: auto;
   position: relative;
   z-index: 1;
-  box-shadow: 0 10px 28px rgba(11, 27, 53, 0.12);
+  box-shadow: 0 10px 28px rgba(6, 2, 18, 0.45);
 }
 
 .search-row {
@@ -178,12 +180,12 @@
   justify-content: space-between;
   align-items: center;
   border: none;
-  border-bottom: 1px solid #f1f2f5;
-  background: white;
+  border-bottom: 1px solid #1c1433;
+  background: #17102d;
   text-align: left;
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.1s ease;
-  color: #0f172a;
+  color: #f5f0ff;
 }
 
 .search-row:last-child {
@@ -191,28 +193,28 @@
 }
 
 .search-row.active {
-  background: #f0e9ff;
-  border-left: 3px solid #7c3aed;
+  background: #23163f;
+  border-left: 3px solid #4c1d95;
 }
 
 .search-row:hover {
-  background: #f4f7ff;
+  background: #1f1638;
   transform: translateX(2px);
 }
 
 .search-title {
   font-weight: 700;
   margin: 0;
-  color: #0b1224;
+  color: #f5f0ff;
 }
 
 .muted {
-  color: #6b7280;
+  color: #c3b4e3;
 }
 
 .muted.small {
   font-size: 12px;
-  color: #4b5563;
+  color: #b1a4d7;
 }
 
 .pill {
@@ -226,18 +228,18 @@
 }
 
 .pill-warn {
-  background: #fff3e6;
-  color: #c05621;
+  background: rgba(255, 166, 94, 0.14);
+  color: #ffd7aa;
 }
 
 .pill-info {
-  background: rgba(124, 58, 237, 0.16);
-  color: #0f172a;
+  background: rgba(76, 29, 149, 0.18);
+  color: #e5dfff;
 }
 
 .pill-neutral {
-  background: #f3f4f6;
-  color: #374151;
+  background: #1f1638;
+  color: #e5dfff;
 }
 
 .error-box, .success-box {
@@ -247,17 +249,17 @@
 }
 
 .error-box {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-  box-shadow: 0 10px 26px rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecdd3;
+  border: 1px solid #fda4af;
+  box-shadow: 0 10px 26px rgba(239, 68, 68, 0.28);
 }
 
 .success-box {
-  background: #ecfdf3;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-  box-shadow: 0 10px 26px rgba(34, 197, 94, 0.18);
+  background: rgba(34, 197, 94, 0.14);
+  color: #bbf7d0;
+  border: 1px solid #4ade80;
+  box-shadow: 0 10px 26px rgba(34, 197, 94, 0.28);
 }
 
 .form-group {

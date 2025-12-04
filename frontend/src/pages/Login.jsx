@@ -6,6 +6,7 @@ import '../styles/login.css';
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -46,11 +47,25 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className="login-shell">
+      <div className="login-hero">
+        <div className="hero-brand">
+          <div className="hero-logo-placeholder">Your Logo</div>
+          <div>
+            <h1 className="hero-title">Play &amp; Palm IMS</h1>
+            <p className="hero-subtitle">Inventory Management System</p>
+          </div>
+        </div>
+        <p className="hero-copy">
+          Track every console with precise storage, edition, and color details. Built for real retail operations.
+        </p>
+      </div>
+
+      <div className="login-card login-card-right">
+        <div className="login-welcome">Welcome</div>
         <div className="login-header">
-          <h1 className="login-title">Play & Palm IMS</h1>
-          <p className="login-subtitle">Inventory Management System</p>
+          <h2 className="login-title">Welcome back</h2>
+          <p className="login-subtitle">Sign in to manage inventory</p>
         </div>
 
         {error && <div className="form-error">{error}</div>}
@@ -71,15 +86,39 @@ export default function Login() {
 
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
-              disabled={loading}
-            />
+            <div className="password-input-wrapper" style={{ position: 'relative' }}>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="form-input"
+                disabled={loading}
+                style={{ paddingRight: '80px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="password-toggle-btn"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <span aria-hidden="true" className="eye-icon">
+                  {showPassword ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94a10.07 10.07 0 0 1-5.94 2.06C4.55 20 1 12 1 12a17.78 17.78 0 0 1 4.21-5.57m3.09-2A9.44 9.44 0 0 1 12 4c6.45 0 10 8 10 8a18.09 18.09 0 0 1-2.15 3.41" />
+                      <path d="M9.9 9.9a3 3 0 1 1 4.2 4.2" />
+                      <path d="m1 1 22 22" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </span>
+              </button>
+            </div>
           </div>
 
           <button
