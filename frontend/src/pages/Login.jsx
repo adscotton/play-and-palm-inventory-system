@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -30,17 +32,31 @@ export default function Login() {
 
       if (res.ok) {
         const data = await res.json();
+        if (!data?.token || !data?.user) {
+          throw new Error('Login response was missing data.');
+        }
+        const role = data.user.role || 'staff';
         localStorage.setItem('token', data.token);
-        localStorage.setItem('userRole', data.user.role);
-        localStorage.setItem('username', data.user.username);
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('username', data.user.username || username);
         navigate('/dashboard');
       } else if (res.status === 401) {
         setError('Invalid username or password.');
       } else {
-        setError('Login failed. Please try again.');
+        const text = await res.text().catch(() => '');
+        let message = 'Login failed. Please try again.';
+        if (text) {
+          try {
+            const parsed = JSON.parse(text);
+            message = parsed?.error || parsed?.message || message;
+          } catch (_) {
+            message = text;
+          }
+        }
+        setError(message);
       }
     } catch (err) {
-      setError('Unable to reach server. Please try again.');
+      setError(err?.message || 'Unable to reach server. Please try again.');
     } finally {
       setLoading(false);
     }

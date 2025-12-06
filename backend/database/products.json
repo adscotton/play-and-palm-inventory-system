@@ -1,18 +1,37 @@
 [
   {
-    "name": "Test",
-    "brand": "test",
+    "name": "PlayStation 5 Disc",
+    "brand": "Sony",
     "category": "Console",
-    "price": 10,
-    "stock": 71,
+    "price": 499,
+    "stock": 8,
     "status": "Available",
-    "description": null,
-    "manufacturer": null,
-    "storage": "10GB",
-    "edition": "Color",
-    "release_date": null,
-    "tags": null,
+    "description": "Disc edition console",
+    "manufacturer": "Sony Interactive Entertainment",
+    "storage": "128GB",
+    "edition": "Launch Disc (White)",
+    "release_date": "2020-11-12",
+    "tags": [
+      "console",
+      "next-gen"
+    ],
     "image": null,
     "id": 1
+  },
+  {
+    "name": "PlayStation 5 Disc",
+    "brand": "Sony",
+    "category": "Console",
+    "price": 0.99,
+    "stock": 1,
+    "status": "Low in Stock",
+    "description": null,
+    "manufacturer": "Sony Interactive Entertainment",
+    "storage": "1GB",
+    "edition": "Launch Disc (Black)",
+    "release_date": "2025-12-16",
+    "tags": null,
+    "image": null,
+    "id": 2
   }
 ]

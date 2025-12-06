@@ -49,7 +49,7 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [existingNames, setExistingNames] = useState([]);
+  const [existingVariants, setExistingVariants] = useState([]);
 
   const derivedStatus = useMemo(
     () => (formData.stock === '' ? '' : computeStatus(formData.stock)),
@@ -93,12 +93,16 @@ export default function EditProduct() {
         const res = await fetch(`${API_BASE}/api/products`);
         if (res.ok) {
           const data = await res.json();
-          const names = Array.isArray(data)
+          const variants = Array.isArray(data)
             ? data
                 .filter((p) => String(p.id) !== String(id))
-                .map((p) => (p.name || '').trim().toLowerCase())
+                .map((p) => {
+                  const name = (p.name || '').trim().toLowerCase();
+                  const edition = (p.edition || '').trim().toLowerCase();
+                  return `${name}||${edition}`;
+                })
             : [];
-          setExistingNames(names);
+          setExistingVariants(variants);
         }
       } catch (err) {
         console.error('Failed to load names', err);
@@ -136,9 +140,11 @@ export default function EditProduct() {
       if (!Number.isFinite(parsedPrice) || parsedPrice < 0) issues.push('Price must be 0 or greater.');
     }
 
-    const normalized = (formData.name || '').trim().toLowerCase();
-    if (canEditAll && existingNames.includes(normalized)) {
-      issues.push('Product name already exists.');
+    const normalizedName = (formData.name || '').trim().toLowerCase();
+    const normalizedEdition = (formData.edition || '').trim().toLowerCase();
+    const variantKey = `${normalizedName}||${normalizedEdition}`;
+    if (canEditAll && existingVariants.includes(variantKey)) {
+      issues.push('Product variant (name + edition) already exists.');
     }
 
     if (issues.length) {
@@ -183,7 +189,19 @@ export default function EditProduct() {
 
       if (!res.ok) {
         const text = await res.text().catch(() => null);
-        throw new Error(text || 'Failed to update product on backend');
+        let message = text || 'Failed to update product on backend';
+        if (text) {
+          try {
+            const parsed = JSON.parse(text);
+            message = parsed?.error || parsed?.message || message;
+          } catch (_) {
+            // keep default
+          }
+        }
+        if (res.status === 409) {
+          message = message || 'Product variant (name + edition) already exists.';
+        }
+        throw new Error(message);
       }
 
       const updated = await res.json();

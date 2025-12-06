@@ -110,6 +110,9 @@ function ProductSearch({ token, onPick, initialSearch = '', disabled, setError }
                 <p className="muted small">
                   {item.brand || 'Unknown brand'} • {item.category || 'Uncategorized'}
                 </p>
+                <p className="muted tiny">
+                  {item.edition ? `Edition: ${item.edition}` : 'Edition: Standard'} • {item.storage || 'Storage: N/A'}
+                </p>
               </div>
               <div className="search-meta">
                 {PRICE_PILL(item)}

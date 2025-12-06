@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "password": "admin123",
+    "firstName": "Alex",
+    "lastName": "Admin",
+    "email": "admin@playpalm.local",
+    "role": "admin",
+    "contactNumber": "555-0101",
+    "location": "HQ"
+  },
+  {
+    "id": 2,
+    "username": "staff",
+    "password": "staff123",
+    "firstName": "Sasha",
+    "lastName": "Staff",
+    "email": "staff@playpalm.local",
+    "role": "staff",
+    "contactNumber": "555-0102",
+    "location": "Outlet"
+  }
+]

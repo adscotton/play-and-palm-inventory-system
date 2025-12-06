@@ -106,3 +106,5 @@ All go through: `http://localhost:4000/api/`
 - `backend/database/products.json` — local fallback DB
 - `frontend/src/pages/InventoryList.jsx` — fetch products from backend
 - `frontend/src/pages/AddProduct.jsx` — POST to backend
+
+

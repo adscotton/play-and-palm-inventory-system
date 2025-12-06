@@ -1,22 +1,22 @@
 /* Shared theme tokens */
 :root {
-  --c-primary: #4c1d95;
-  --c-primary-dark: #2e1065;
-  --c-accent: #a78bfa;
-  --c-surface: #0f0a1e;
-  --c-surface-soft: #151026;
-  --c-border: #261943;
+  --c-primary: #351266;
+  --c-primary-dark: #210a4b;
+  --c-accent: #8f7cf6;
+  --c-surface: #0c0818;
+  --c-surface-soft: #120c23;
+  --c-border: #1f1436;
   --c-text: #f5f0ff;
   --c-muted: #c3b4e3;
-  --focus-ring: 0 0 0 3.5px rgba(167, 139, 250, 0.28);
-  --shadow-strong: 0 20px 60px rgba(6, 2, 18, 0.6);
-  --shadow-soft: 0 12px 32px rgba(6, 2, 18, 0.42);
+  --focus-ring: 0 0 0 3px rgba(143, 124, 246, 0.24);
+  --shadow-strong: 0 20px 60px rgba(6, 2, 18, 0.7);
+  --shadow-soft: 0 12px 32px rgba(6, 2, 18, 0.5);
 }
 
 /* Header Styles */
 .header,
 .app-header {
-  background: linear-gradient(120deg, rgba(44, 16, 74, 0.95), rgba(93, 27, 138, 0.94));
+  background: linear-gradient(120deg, rgba(30, 12, 54, 0.96), rgba(58, 19, 99, 0.94));
   color: #e7edf6;
   padding: 1.35rem 2.15rem;
   display: flex;
@@ -35,8 +35,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 18% 40%, rgba(124, 58, 237, 0.28), transparent 40%),
-    radial-gradient(circle at 80% 10%, rgba(168, 85, 247, 0.22), transparent 45%);
+  background: radial-gradient(circle at 18% 40%, rgba(124, 58, 237, 0.2), transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(168, 85, 247, 0.16), transparent 45%);
   z-index: 0;
   pointer-events: none;
 }
@@ -75,7 +75,7 @@
 /* Sidebar Styles */
 .sidebar {
   width: 262px;
-  background: linear-gradient(180deg, #0d0819 0%, #120a26 55%, #140c2b 100%);
+  background: linear-gradient(180deg, #0a0614 0%, #110922 55%, #130c29 100%);
   color: #e2e8f0;
   height: 100vh;
   position: fixed;
@@ -95,8 +95,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.18), transparent 38%),
-    radial-gradient(circle at 80% 10%, rgba(168, 85, 247, 0.14), transparent 40%);
+  background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.12), transparent 38%),
+    radial-gradient(circle at 80% 10%, rgba(168, 85, 247, 0.1), transparent 40%);
   pointer-events: none;
   z-index: 0;
 }
@@ -166,7 +166,7 @@
 }
 
 .sidebar-nav-item.active {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(168, 85, 247, 0.18));
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.32), rgba(168, 85, 247, 0.22));
   color: #f8fbff;
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 14px 28px rgba(124, 58, 237, 0.25);
@@ -214,10 +214,10 @@
 }
 
 .btn-primary {
-  background: linear-gradient(120deg, #4c1d95, #2e1065);
+  background: linear-gradient(120deg, #361266, #240b4f);
   color: #f8fbff;
-  box-shadow: 0 16px 30px rgba(46, 16, 101, 0.45);
-  border-color: rgba(76, 29, 149, 0.55);
+  box-shadow: 0 16px 30px rgba(36, 12, 72, 0.55);
+  border-color: rgba(53, 18, 102, 0.7);
 }
 
 .btn-primary:hover {
@@ -230,7 +230,7 @@
 }
 
 .btn-secondary {
-  background: rgba(76, 29, 149, 0.16);
+  background: rgba(76, 29, 149, 0.28);
   color: #e9e0ff;
   border-color: var(--c-border);
   box-shadow: 0 6px 16px rgba(17, 12, 31, 0.5);
@@ -295,7 +295,7 @@ select.form-select {
 
 select.form-input option,
 select.form-select option {
-  background-color: #0f0a1e;
+  background-color: #0c0818;
   color: #f5f0ff;
 }
 
@@ -326,6 +326,18 @@ select.form-select option {
   text-align: center;
   transition: all 0.2s ease;
   border: 1px solid rgba(38, 25, 67, 0.9);
+}
+
+/* Keep autofill from turning inputs white */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+select:-webkit-autofill,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--c-text);
+  box-shadow: 0 0 0 1000px #1d1538 inset;
+  border-color: var(--c-border);
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .stat-box:hover {

@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import '../styles/add-product.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+const REQUEST_TIMEOUT_MS = 10000;
 const CATEGORY_OPTIONS = ['Console', 'Handheld', 'Games', 'Accessories', 'VR', 'Other'];
 const STORAGE_UNITS = ['TB', 'GB', 'MB'];
 
@@ -16,6 +17,16 @@ function deriveStatus(stock) {
   return 'Available';
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error('Request timed out')), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export default function AddProduct() {
   const navigate = useNavigate();
   const role = (localStorage.getItem('userRole') || '').toLowerCase();
@@ -23,6 +34,7 @@ export default function AddProduct() {
   const [formData, setFormData] = useState({
     name: '',
     brand: '',
+    edition: '',
     category: CATEGORY_OPTIONS[0],
     storageValue: '',
     storageUnit: 'GB',
@@ -34,7 +46,7 @@ export default function AddProduct() {
     tags: '',
     image: '',
   });
-  const [existingNames, setExistingNames] = useState([]);
+  const [existingVariants, setExistingVariants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -42,8 +54,14 @@ export default function AddProduct() {
     fetch(`${API_BASE}/api/products`)
       .then((res) => res.ok ? res.json() : [])
       .then((data) => {
-        const names = Array.isArray(data) ? data.map((p) => (p.name || '').trim().toLowerCase()) : [];
-        setExistingNames(names);
+        const variants = Array.isArray(data)
+          ? data.map((p) => {
+              const name = (p.name || '').trim().toLowerCase();
+              const edition = (p.edition || '').trim().toLowerCase();
+              return `${name}||${edition}`;
+            })
+          : [];
+        setExistingVariants(variants);
       })
       .catch(() => {});
   }, []);
@@ -77,9 +95,11 @@ export default function AddProduct() {
       issues.push('Stock must be 0 or greater.');
     }
 
-    const normalized = (formData.name || '').trim().toLowerCase();
-    if (existingNames.includes(normalized)) {
-      issues.push('Product name already exists.');
+    const normalizedName = (formData.name || '').trim().toLowerCase();
+    const normalizedEdition = (formData.edition || '').trim().toLowerCase();
+    const variantKey = `${normalizedName}||${normalizedEdition}`;
+    if (existingVariants.includes(variantKey)) {
+      issues.push('Product variant (name + edition) already exists.');
     }
 
     if (issues.length) {
@@ -109,7 +129,7 @@ export default function AddProduct() {
         image: formData.image || undefined,
       };
 
-      const res = await fetch(`${API_BASE}/api/products`, {
+      const res = await fetchWithTimeout(`${API_BASE}/api/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,14 +139,30 @@ export default function AddProduct() {
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => null);
-        throw new Error(text || 'Failed to create product on backend');
+        const text = await res.text().catch(() => '');
+        let message = 'Failed to create product on backend';
+        if (text) {
+          try {
+            const parsed = JSON.parse(text);
+            message = parsed?.error || parsed?.message || text;
+            if (res.status === 409) {
+              message = message || 'Product variant (name + edition) already exists.';
+            }
+          } catch (_) {
+            message = text;
+          }
+        }
+        throw new Error(message);
       }
 
       const created = await res.json();
       navigate(`/product/${created.id}`);
     } catch (err) {
-      setError(err.message || 'Failed to add product');
+      if (err?.name === 'AbortError' || /timed out/i.test(err?.message || '')) {
+        setError('Request timed out. Please check your connection or try again.');
+      } else {
+        setError(err.message || 'Failed to add product');
+      }
     } finally {
       setLoading(false);
     }

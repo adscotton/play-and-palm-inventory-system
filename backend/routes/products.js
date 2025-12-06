@@ -4,16 +4,40 @@ const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { supabase } = require('../utils/supabaseClient');
+const { supabase, hasSupabaseKey } = require('../utils/supabaseClient');
 
 const DB_PRODUCTS = path.join(__dirname, '..', 'database', 'products.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 const AUDIT_TABLE = 'audit_logs';
 const TABLE_PRODUCTS = 'products';
-const PRODUCT_SELECT_FLAT = 'id, name, brand, category, manufacturer, price, stock, status, description, release_date, tags, image, storage, edition';
+const TABLE_BRANDS = 'brands';
+const TABLE_CATEGORIES = 'categories';
+const TABLE_MANUFACTURERS = 'manufacturers';
+const PRODUCT_SELECT_JOINED = [
+  'id',
+  'name',
+  'brand_id',
+  'category_id',
+  'manufacturer_id',
+  'storage',
+  'edition',
+  'price',
+  'stock',
+  'status',
+  'description',
+  'release_date',
+  'tags',
+  'image',
+  'brand:brands (id, name)',
+  'category:categories (id, name)',
+  'manufacturer:manufacturers (id, name)'
+].join(', ');
 
+const SUPABASE_ENABLED = String(process.env.SUPABASE_ENABLED || '').toLowerCase() !== 'false';
+const FORCE_LOCAL_PRODUCTS = String(process.env.FORCE_LOCAL_PRODUCTS || '').toLowerCase() === 'true';
+const HAS_SUPABASE = hasSupabaseKey && !!supabase;
 const PRODUCT_CACHE_TTL_MS = parseInt(process.env.PRODUCT_CACHE_TTL_MS || '15000', 10);
-const SUPABASE_TIMEOUT_MS = parseInt(process.env.SUPABASE_TIMEOUT_MS || '5000', 10);
+const SUPABASE_TIMEOUT_MS = parseInt(process.env.SUPABASE_TIMEOUT_MS || '7000', 10);
 const productCache = {
   list: null,
   listTs: 0,
@@ -31,6 +55,10 @@ function withTimeout(promise, ms, label = 'operation') {
       setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
     ),
   ]);
+}
+
+async function runSupabase(promise, label) {
+  return withTimeout(promise, SUPABASE_TIMEOUT_MS, label);
 }
 
 function getCachedList() {
@@ -93,7 +121,13 @@ function readProductsLocal() {
   ensureProductsFile();
   try {
     const raw = fs.readFileSync(DB_PRODUCTS, 'utf-8');
-    return JSON.parse(raw || '[]');
+    const parsed = JSON.parse(raw || '[]');
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((p) => ({
+      ...p,
+      price: p.price !== undefined && p.price !== null ? Number(p.price) : 0,
+      stock: p.stock !== undefined && p.stock !== null ? Number(p.stock) : 0,
+    }));
   } catch (err) {
     console.error('Local products.json parse error, resetting:', err);
     fs.writeFileSync(DB_PRODUCTS, JSON.stringify([], null, 2), 'utf-8');
@@ -107,11 +141,67 @@ function writeProductsLocal(products) {
 }
 
 function isSupabaseAvailable() {
-  return supabase !== null;
+  return SUPABASE_ENABLED && !FORCE_LOCAL_PRODUCTS && HAS_SUPABASE;
+}
+
+async function resolveLookupId(table, value) {
+  if (!isSupabaseAvailable()) return null;
+  const cleaned = (value || '').trim();
+  if (!cleaned) return null;
+  try {
+    const { data: existing, error: fetchErr } = await runSupabase(
+      supabase
+        .from(table)
+        .select('id')
+        .ilike('name', cleaned)
+        .maybeSingle(),
+      `lookup ${table}`
+    );
+    if (fetchErr && fetchErr.code !== 'PGRST116') throw fetchErr;
+    if (existing?.id) return existing.id;
+
+    const { data, error } = await runSupabase(
+      supabase
+        .from(table)
+        .insert([{ name: cleaned }])
+        .select('id')
+        .single(),
+      `insert ${table}`
+    );
+
+    if (error) {
+      // Handle race on unique name by re-selecting
+      if (error.code === '23505' || (error.message || '').toLowerCase().includes('duplicate')) {
+        const { data: dup } = await runSupabase(
+          supabase
+            .from(table)
+            .select('id')
+            .ilike('name', cleaned)
+            .maybeSingle(),
+          `lookup-dup ${table}`
+        );
+        return dup?.id || null;
+      }
+      throw error;
+    }
+    return data?.id || null;
+  } catch (err) {
+    console.error(`Failed to resolve lookup id for ${table}:`, err.message || err);
+    return null;
+  }
+}
+
+async function resolveProductLookups({ brand, category, manufacturer }) {
+  const [brandId, categoryId, manufacturerId] = await Promise.all([
+    resolveLookupId(TABLE_BRANDS, brand),
+    resolveLookupId(TABLE_CATEGORIES, category),
+    resolveLookupId(TABLE_MANUFACTURERS, manufacturer)
+  ]);
+  return { brandId, categoryId, manufacturerId };
 }
 
 async function fetchProductsFromSupabase({ term = null, id = null, limit = null, orderById = true }) {
-  if (!supabase) return null;
+  if (!isSupabaseAvailable()) return null;
 
   const applyFilters = (query) => {
     if (term) query = query.ilike('name', `%${term}%`);
@@ -121,14 +211,13 @@ async function fetchProductsFromSupabase({ term = null, id = null, limit = null,
     return query;
   };
 
-  const { data, error } = await withTimeout(
+  const { data, error } = await runSupabase(
     applyFilters(
       supabase
         .from(TABLE_PRODUCTS)
-        .select(PRODUCT_SELECT_FLAT)
+        .select(PRODUCT_SELECT_JOINED)
     ),
-    SUPABASE_TIMEOUT_MS,
-    'Supabase products (flat)'
+    'Supabase products (joined)'
   );
   if (error) throw error;
   return data || [];
@@ -167,14 +256,25 @@ function shapeProductResponse(row) {
 
 function mapProductRow(row) {
   if (!row) return row;
+  const tags = normalizeTags(row.tags) || [];
+  const brandName = row.brand?.name ?? row.brand ?? null;
+  const categoryName = row.category?.name ?? row.category ?? null;
+  const manufacturerName = row.manufacturer?.name ?? row.manufacturer ?? null;
+
   return shapeProductResponse({
     ...row,
-    tags: normalizeTags(row.tags) || [],
+    brand: brandName,
+    category: categoryName,
+    manufacturer: manufacturerName,
+    brand_id: row.brand_id ?? row.brand?.id ?? null,
+    category_id: row.category_id ?? row.category?.id ?? null,
+    manufacturer_id: row.manufacturer_id ?? row.manufacturer?.id ?? null,
+    tags
   });
 }
 
 async function fetchProductById(id) {
-  if (!supabase) return null;
+  if (!isSupabaseAvailable()) return null;
   const cached = getCachedItem(id);
   if (cached) return cached;
 
@@ -190,7 +290,7 @@ async function fetchProductById(id) {
 }
 
 async function logAudit(userId, entityId, action, details = {}, username = null) {
-  if (!supabase) return;
+  if (!isSupabaseAvailable()) return;
   try {
     const payloadDetails = username ? { ...details, username } : details;
     await supabase.from(AUDIT_TABLE).insert([{
@@ -348,6 +448,7 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
   }
 
   const normalizedName = normalizeName(name);
+  const normalizedEdition = normalizeName(edition || '');
   const parsedStock =
     stock === undefined || stock === null || stock === ''
       ? 0
@@ -375,22 +476,35 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
 
   if (isSupabaseAvailable()) {
     try {
-      // Duplicate check by name (case-insensitive)
-      const { data: existing, error: dupErr } = await supabase
-        .from(TABLE_PRODUCTS)
-        .select('id, name')
-        .ilike('name', normalizedName)
-        .maybeSingle();
+      const { brandId, categoryId, manufacturerId } = await resolveProductLookups({
+        brand,
+        category,
+      manufacturer
+    });
+
+      if (!brandId) {
+        return res.status(400).json({ error: 'Brand could not be resolved' });
+      }
+
+      // Duplicate check by composite variant (name + edition)
+      const { data: dupRows, error: dupErr } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .select('id, name, edition')
+          .ilike('name', normalizedName),
+        'Supabase duplicate check'
+      );
       if (dupErr) console.error('Supabase duplicate check error:', dupErr);
-      if (existing?.id) {
-        return res.status(409).json({ error: 'Product name already exists' });
+      const hasDup = (dupRows || []).some((row) => normalizeName(row.edition || '') === normalizedEdition);
+      if (hasDup) {
+        return res.status(409).json({ error: 'Product variant (name + edition) already exists' });
       }
 
       const supabasePayload = {
         name,
-        brand,
-        category,
-        manufacturer,
+        brand_id: brandId,
+        category_id: categoryId,
+        manufacturer_id: manufacturerId,
         storage: storage || null,
         edition: edition || null,
         price: parseFloat(price),
@@ -398,14 +512,18 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
         status: computedStatus,
         description: description || null,
         release_date: releaseDate || null,
+        tags: normalizeTags(tags),
         image: image || null,
       };
 
-      const { data, error } = await supabase
-        .from(TABLE_PRODUCTS)
-        .insert([supabasePayload])
-        .select('id')
-        .single();
+      const { data, error } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .insert([supabasePayload])
+          .select('id')
+          .single(),
+        'Supabase insert product'
+      );
 
       if (error) {
         console.error('Supabase insert error:', error);
@@ -425,12 +543,19 @@ router.post('/', verifyToken, requireManagerOrAdmin, async (req, res) => {
   // Local fallback
   try {
     const items = readProductsLocal();
-    const duplicate = items.find((p) => normalizeName(p.name) === normalizedName);
+    const duplicate = items.find(
+      (p) =>
+        normalizeName(p.name) === normalizedName &&
+        normalizeName(p.edition || '') === normalizedEdition
+    );
     if (duplicate) {
-      return res.status(409).json({ error: 'Product name already exists' });
+      return res.status(409).json({ error: 'Product variant (name + edition) already exists' });
     }
     const maxId = items.reduce((max, item) => Math.max(max, item.id || 0), 0);
-    const newItem = { ...payload, id: maxId + 1 };
+    const newItem = {
+      ...payload,
+      id: maxId + 1,
+    };
     items.push(newItem);
     writeProductsLocal(items);
     res.status(201).json(newItem);
@@ -481,11 +606,14 @@ router.put('/:id/stock', verifyToken, async (req, res) => {
 
   if (isSupabaseAvailable()) {
     try {
-      const { data: existing, error: fetchErr } = await supabase
-        .from(TABLE_PRODUCTS)
-        .select('id, stock')
-        .eq('id', id)
-        .maybeSingle();
+      const { data: existing, error: fetchErr } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .select('id, stock')
+          .eq('id', id)
+          .maybeSingle(),
+        'Supabase stock fetch'
+      );
       if (fetchErr) throw fetchErr;
       if (!existing) throw new Error('not-found');
       const currentStock = Number(existing.stock) || 0;
@@ -496,9 +624,6 @@ router.put('/:id/stock', verifyToken, async (req, res) => {
         return res.status(400).json({ error: err.message });
       }
 
-      const statusId = await getStatusId(update.status).catch((err) => {
-        return null;
-      });
       const { data, error } = await supabase
         .from(TABLE_PRODUCTS)
         .update({ stock: update.newStock, status: update.status })
@@ -516,11 +641,10 @@ router.put('/:id/stock', verifyToken, async (req, res) => {
       return res.json(refreshed || shapeProductResponse({ ...data, status: update.status }));
     } catch (err) {
       if (err?.message === 'not-found') {
-        console.warn('Supabase stock PUT: product not found, trying local fallback');
-      } else {
-        console.error('Supabase stock PUT failed (will try local fallback):', err);
+        return res.status(404).json({ error: 'Product not found' });
       }
-      // fall through to local fallback
+      console.error('Supabase stock PUT failed, falling back to local:', err?.message || err);
+      // Fall through to local fallback below
     }
   }
 
@@ -566,22 +690,28 @@ router.put('/:id/stock/reduce', verifyToken, async (req, res) => {
 
   if (isSupabaseAvailable()) {
     try {
-      const { data: existing, error: fetchErr } = await supabase
-        .from(TABLE_PRODUCTS)
-        .select('id, stock')
-        .eq('id', id)
-        .maybeSingle();
+      const { data: existing, error: fetchErr } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .select('id, stock')
+          .eq('id', id)
+          .maybeSingle(),
+        'Supabase reduce stock fetch'
+      );
       if (fetchErr) throw fetchErr;
       if (!existing) throw new Error('not-found');
       const currentStock = Number(existing.stock) || 0;
       const update = applyUpdate(currentStock);
 
-      const { data, error } = await supabase
-        .from(TABLE_PRODUCTS)
-        .update({ stock: update.newStock, status: update.status })
-        .eq('id', id)
-        .select()
-        .maybeSingle();
+      const { data, error } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .update({ stock: update.newStock, status: update.status })
+          .eq('id', id)
+          .select()
+          .maybeSingle(),
+        'Supabase reduce stock update'
+      );
       if (error) {
         console.error('Supabase reduce stock error:', error);
         return res.status(400).json({ error: error.message || 'Update failed' });
@@ -593,11 +723,10 @@ router.put('/:id/stock/reduce', verifyToken, async (req, res) => {
       return res.json(refreshed || shapeProductResponse({ ...data, status: update.status }));
     } catch (err) {
       if (err?.message === 'not-found') {
-        console.warn('Supabase reduce stock: product not found, trying local fallback');
-      } else {
-        console.error('Supabase reduce stock PUT failed (will try local fallback):', err);
+        return res.status(404).json({ error: 'Product not found' });
       }
-      // fall through to local fallback
+      console.error('Supabase reduce stock PUT failed, falling back to local:', err?.message || err);
+      // Fall through to local fallback below
     }
   }
 
@@ -629,24 +758,29 @@ router.put('/:id/price', verifyToken, requireManagerOrAdmin, async (req, res) =>
 
   if (isSupabaseAvailable()) {
     try {
-      const { data, error } = await supabase
-        .from(TABLE_PRODUCTS)
-        .update({ price: parsedPrice })
-        .eq('id', id)
-        .select('id')
-        .maybeSingle();
+      const { data, error } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .update({ price: parsedPrice })
+          .eq('id', id)
+          .select('id')
+          .maybeSingle(),
+        'Supabase price update'
+      );
 
       if (error) {
         console.error('Supabase price update error:', error);
-      } else if (data) {
-        await logAudit(req.user?.id, data.id, 'UPDATE_PRICE', { price: parsedPrice }, req.user?.username);
-        const refreshed = await fetchProductById(data.id);
-        invalidateCache(id);
-        cacheItem(refreshed);
-        return res.json(refreshed || shapeProductResponse({ ...data, price: parsedPrice }));
+        return res.status(400).json({ error: error.message || 'Update failed' });
       }
+      if (!data) return res.status(404).json({ error: 'Product not found' });
+      await logAudit(req.user?.id, data.id, 'UPDATE_PRICE', { price: parsedPrice }, req.user?.username);
+      const refreshed = await fetchProductById(data.id);
+      invalidateCache(id);
+      cacheItem(refreshed);
+      return res.json(refreshed || shapeProductResponse({ ...data, price: parsedPrice }));
     } catch (err) {
-      console.error('Supabase price PUT failed:', err);
+      console.error('Supabase price PUT failed, falling back to local:', err?.message || err);
+      // Fall through to local fallback below
     }
   }
 
@@ -721,31 +855,65 @@ router.put('/:id', verifyToken, async (req, res) => {
 
   if (isSupabaseAvailable()) {
     try {
-      // Duplicate name check (if name changing)
-      if (updates.name) {
-        const normalizedName = normalizeName(updates.name);
-        const { data: dup } = await supabase
+      const { data: current, error: currentErr } = await runSupabase(
+        supabase
           .from(TABLE_PRODUCTS)
-          .select('id, name')
-          .ilike('name', normalizedName)
-          .neq('id', id)
-          .maybeSingle();
-        if (dup?.id) {
-          return res.status(409).json({ error: 'Product name already exists' });
+          .select('id, name, brand_id, edition')
+          .eq('id', id)
+          .maybeSingle(),
+        'Supabase fetch product for update'
+      );
+      if (currentErr) throw currentErr;
+      if (!current) return res.status(404).json({ error: 'Product not found' });
+
+      const brandIdForUpdates = updates.brand !== undefined
+        ? await resolveLookupId(TABLE_BRANDS, updates.brand)
+        : current.brand_id;
+
+      if (updates.brand !== undefined && !brandIdForUpdates) {
+        return res.status(400).json({ error: 'Brand could not be resolved' });
+      }
+
+      const targetName = updates.name !== undefined ? updates.name : current.name;
+      const targetEdition = updates.edition !== undefined ? updates.edition : current.edition;
+      const normalizedTargetName = normalizeName(targetName || '');
+      const normalizedTargetEdition = normalizeName(targetEdition || '');
+      const requiresVariantCheck = updates.name !== undefined || updates.edition !== undefined;
+
+      if (requiresVariantCheck && targetName) {
+        const { data: dupRows, error: dupErr } = await runSupabase(
+          supabase
+            .from(TABLE_PRODUCTS)
+            .select('id, name, edition')
+            .ilike('name', normalizedTargetName)
+            .neq('id', id),
+          'Supabase duplicate check update'
+        );
+        if (dupErr) console.error('Supabase duplicate check error:', dupErr);
+        const hasDup = (dupRows || []).some((row) => normalizeName(row.edition || '') === normalizedTargetEdition);
+        if (hasDup) {
+          return res.status(409).json({ error: 'Product variant (name + edition) already exists' });
         }
       }
 
       const supabaseUpdates = {};
 
       if (updates.name !== undefined) supabaseUpdates.name = updates.name;
-      if (updates.brand !== undefined) supabaseUpdates.brand = updates.brand;
-      if (updates.category !== undefined) supabaseUpdates.category = updates.category;
-      if (updates.manufacturer !== undefined) supabaseUpdates.manufacturer = updates.manufacturer;
+      if (updates.brand !== undefined) {
+        supabaseUpdates.brand_id = brandIdForUpdates;
+      }
+      if (updates.category !== undefined) {
+        supabaseUpdates.category_id = await resolveLookupId(TABLE_CATEGORIES, updates.category);
+      }
+      if (updates.manufacturer !== undefined) {
+        supabaseUpdates.manufacturer_id = await resolveLookupId(TABLE_MANUFACTURERS, updates.manufacturer);
+      }
       if (updates.price !== undefined) supabaseUpdates.price = updates.price;
       if (updates.description !== undefined) supabaseUpdates.description = updates.description;
       if (updates.storage !== undefined) supabaseUpdates.storage = updates.storage;
       if (updates.edition !== undefined) supabaseUpdates.edition = updates.edition;
       if (updates.release_date !== undefined) supabaseUpdates.release_date = updates.release_date;
+      if (updates.tags !== undefined) supabaseUpdates.tags = updates.tags;
       if (updates.stock !== undefined) {
         supabaseUpdates.stock = updates.stock;
         supabaseUpdates.status = updates.status;
@@ -753,12 +921,15 @@ router.put('/:id', verifyToken, async (req, res) => {
 
       let targetId = id;
       if (Object.keys(supabaseUpdates).length) {
-        const { data, error } = await supabase
-          .from(TABLE_PRODUCTS)
-          .update(supabaseUpdates)
-          .eq('id', id)
-          .select('id')
-          .maybeSingle();
+        const { data, error } = await runSupabase(
+          supabase
+            .from(TABLE_PRODUCTS)
+            .update(supabaseUpdates)
+            .eq('id', id)
+            .select('id')
+            .maybeSingle(),
+          'Supabase update product'
+        );
 
         if (error) {
           console.error('Supabase update error:', error);
@@ -767,10 +938,7 @@ router.put('/:id', verifyToken, async (req, res) => {
         if (!data) return res.status(404).json({ error: 'Product not found' });
         targetId = data.id;
       } else {
-        // ensure product exists when only updating tags
-        const { data, error } = await supabase.from(TABLE_PRODUCTS).select('id').eq('id', id).maybeSingle();
-        if (error) throw error;
-        if (!data) return res.status(404).json({ error: 'Product not found' });
+        targetId = current.id;
       }
 
       const refreshed = await fetchProductById(targetId);
@@ -789,15 +957,24 @@ router.put('/:id', verifyToken, async (req, res) => {
     const idx = items.findIndex((p) => String(p.id) === String(id));
     if (idx === -1) return res.status(404).json({ error: 'Product not found' });
 
-    if (updates.name) {
-      const normalizedName = normalizeName(updates.name);
-      const dup = items.find((p, i) => i !== idx && normalizeName(p.name) === normalizedName);
+    const current = items[idx];
+    const targetName = updates.name !== undefined ? updates.name : current.name;
+    const targetEdition = updates.edition !== undefined ? updates.edition : current.edition;
+    const requiresVariantCheck = updates.name !== undefined || updates.edition !== undefined;
+
+    if (requiresVariantCheck) {
+      const dup = items.find(
+        (p, i) =>
+          i !== idx &&
+          normalizeName(p.name) === normalizeName(targetName) &&
+          normalizeName(p.edition || '') === normalizeName(targetEdition || '')
+      );
       if (dup) {
-        return res.status(409).json({ error: 'Product name already exists' });
+        return res.status(409).json({ error: 'Product variant (name + edition) already exists' });
       }
     }
 
-    const updated = { ...items[idx], ...updates };
+    const updated = { ...current, ...updates };
     if (updates.stock !== undefined) {
       updated.status = computeStatus(updated.stock);
     }
@@ -816,12 +993,15 @@ router.delete('/:id', verifyToken, requireManagerOrAdmin, async (req, res) => {
 
   if (isSupabaseAvailable()) {
     try {
-      const { data, error } = await supabase
-        .from(TABLE_PRODUCTS)
-        .delete()
-        .eq('id', id)
-        .select()
-        .maybeSingle();
+      const { data, error } = await runSupabase(
+        supabase
+          .from(TABLE_PRODUCTS)
+          .delete()
+          .eq('id', id)
+          .select()
+          .maybeSingle(),
+        'Supabase delete product'
+      );
 
       if (error) {
         console.error('Supabase delete error:', error);

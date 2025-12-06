@@ -55,7 +55,8 @@ export default function InventoryList() {
     const needle = search.toLowerCase();
     const matchesSearch =
       (item.name || '').toLowerCase().includes(needle) ||
-      (item.brand || '').toLowerCase().includes(needle);
+      (item.brand || '').toLowerCase().includes(needle) ||
+      (item.edition || '').toLowerCase().includes(needle);
     return matchesCategory && matchesSearch;
   });
 
@@ -131,6 +132,7 @@ export default function InventoryList() {
                   <th>ID</th>
                   <th>Name</th>
                   <th>Brand</th>
+                  <th>Edition</th>
                   <th>Category</th>
                   <th>Price</th>
                   <th>Stock</th>
@@ -144,6 +146,7 @@ export default function InventoryList() {
                     <td className="inventory-cell" data-label="ID">{item.id}</td>
                     <td className="inventory-cell" data-label="Name">{item.name}</td>
                     <td className="inventory-cell" data-label="Brand">{item.brand}</td>
+                    <td className="inventory-cell" data-label="Edition">{item.edition || 'N/A'}</td>
                     <td className="inventory-cell" data-label="Category">{item.category}</td>
                     <td className="inventory-cell" data-label="Price">{formatPrice(item.price)}</td>
                     <td className="inventory-cell" data-label="Stock">{item.stock}</td>

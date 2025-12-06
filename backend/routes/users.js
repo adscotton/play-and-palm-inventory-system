@@ -9,7 +9,7 @@ const router = express.Router();
 const DB_PATH = path.join(__dirname, '..', 'database', 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 const SUPABASE_USERS_TABLE = 'app_users';
-const SUPABASE_TIMEOUT_MS = parseInt(process.env.SUPABASE_TIMEOUT_MS || '2000', 10);
+const SUPABASE_TIMEOUT_MS = parseInt(process.env.SUPABASE_TIMEOUT_MS || '7000', 10);
 const SELECT_USER = 'id, username, email, first_name, last_name, role, contact_number, location, created_at';
 const AUDIT_TABLE = 'audit_logs';
 
@@ -94,15 +94,31 @@ function withTimeout(promise, ms, label = 'operation') {
   ]);
 }
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // GET current user (uses local JWT payload or Supabase if configured)
 router.get('/me', verifyToken, async (req, res) => {
   try {
     if (hasSupabaseKey && supabase) {
       const { id, username } = req.user || {};
-      let query = supabase.from(SUPABASE_USERS_TABLE).select(SELECT_USER);
-      if (id) query = query.eq('id', id).limit(1).maybeSingle();
-      else if (username) query = query.ilike('username', username).limit(1).maybeSingle();
-      const { data, error } = await withTimeout(query, SUPABASE_TIMEOUT_MS, 'Supabase user me');
+      const fetchSupabaseUser = async () => {
+        let query = supabase.from(SUPABASE_USERS_TABLE).select(SELECT_USER);
+        if (id) query = query.eq('id', id).limit(1).maybeSingle();
+        else if (username) query = query.ilike('username', username).limit(1).maybeSingle();
+        return withTimeout(query, SUPABASE_TIMEOUT_MS, 'Supabase user me');
+      };
+
+      let data = null;
+      let error = null;
+
+      for (let attempt = 0; attempt < 2 && !data; attempt += 1) {
+        ({ data, error } = await fetchSupabaseUser().catch((err) => ({ error: err })));
+        if (data || !error) break;
+        await wait(250);
+      }
+
       if (error) throw error;
       if (!data) return res.status(404).json({ error: 'User not found' });
       return res.json(mapSupabaseUser(data));

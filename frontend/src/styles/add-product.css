@@ -14,7 +14,7 @@
   max-width: 1160px;
   margin: 0 auto;
   padding: 2.5rem 1.4rem 3rem;
-  background: linear-gradient(135deg, rgba(76, 29, 149, 0.18), rgba(15, 10, 30, 0.9));
+  background: linear-gradient(135deg, rgba(44, 16, 74, 0.48), rgba(10, 6, 18, 0.94));
   border-radius: 20px;
   border: 1px solid var(--ap-border);
   position: relative;
@@ -28,7 +28,7 @@
   position: absolute;
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle at 22% 18%, rgba(76, 29, 149, 0.26), transparent 50%);
+  background: radial-gradient(circle at 22% 18%, rgba(76, 29, 149, 0.18), transparent 50%);
   top: -140px;
   left: -120px;
   filter: blur(6px);
@@ -39,7 +39,7 @@
   position: absolute;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle at 90% 20%, rgba(167, 139, 250, 0.18), transparent 45%);
+  background: radial-gradient(circle at 90% 20%, rgba(140, 124, 242, 0.14), transparent 45%);
   top: -120px;
   right: -80px;
   filter: blur(4px);
@@ -59,7 +59,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.08), transparent 45%);
+  background: radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.06), transparent 45%);
   pointer-events: none;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .info-banner {
-  background: rgba(76, 29, 149, 0.16);
+  background: rgba(44, 16, 74, 0.32);
   border: 1px solid var(--ap-border);
   color: var(--ap-text);
   padding: 0.95rem 1rem;
@@ -166,7 +166,7 @@
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.01em;
-  background: rgba(167, 139, 250, 0.14);
+  background: rgba(140, 124, 242, 0.18);
   color: var(--ap-text);
 }
 
