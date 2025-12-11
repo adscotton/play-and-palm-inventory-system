@@ -1,5 +1,6 @@
 // src/components/Sidebar.jsx
 import { NavLink, useNavigate } from 'react-router-dom';
+import logo from '../utils/logo.png';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -34,7 +35,9 @@ export default function Sidebar() {
       <div className="sidebar-overlay" onClick={closeSidebar} />
       <aside className="sidebar" aria-hidden={false}>
         <div className="sidebar-logo-container">
-          <div className="sidebar-logo">PP</div>
+          <div className="sidebar-logo">
+            <img src={logo} alt="Play & Palm logo" className="sidebar-logo-img" />
+          </div>
           <h3 className="sidebar-logo-text">PLAY & PALM</h3>
         </div>
 

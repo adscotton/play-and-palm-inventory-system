@@ -2,43 +2,49 @@
 import Header from '../components/Header.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import '../styles/about.css';
+import adrianImg from '../utils/adrian.jpg';
+import alexImg from '../utils/alex.jpg';
+import justynImg from '../utils/justyn.png';
+import keithImg from '../utils/keith.jpg';
+import kerrImg from '../utils/kerr.jpg';
+import stevenImg from '../utils/steven.JPG';
 
 const TEAM_MEMBERS = [
   {
-    name: 'Kerr Lawrence T. Atabelo',
-    role: 'Founder & CEO',
-    bio: 'Sets vision and keeps the roadmap customer-first.',
-    photo: 'AG',
-  },
-  {
     name: 'Adrian Lei M. Benedicto',
-    role: 'CTO',
-    bio: 'Builds resilient cloud architecture and data flows.',
-    photo: 'JL',
+    role: 'Project Manager',
+    bio: 'Leads the project with a focus on delivery and team synergy.',
+    photo: adrianImg,
   },
   {
     name: 'Alex Emmanuel C. Cadaoas',
-    role: 'Lead Product',
-    bio: 'Translates merchant needs into thoughtful experiences.',
-    photo: 'PS',
+    role: 'Frontend Engineer',
+    bio: 'Develops user interfaces with a keen eye for detail and usability.',
+    photo: alexImg,
   },
   {
     name: 'Steven W. Cai',
-    role: 'Engineering Lead',
-    bio: 'Ships APIs, integrations, and keeps performance tight.',
-    photo: 'MT',
+    role: 'Backend Engineer',
+    bio: 'Builds robust server-side logic and database management.',
+    photo: stevenImg,
   },
   {
     name: 'Carl Justyn S. Iglesias',
-    role: 'Design Lead',
-    bio: 'Crafts the interface language and interaction system.',
-    photo: 'EC',
+    role: 'Quality Assurance and UX Designer',
+    bio: 'Ensures product quality and crafts user-friendly designs.',
+    photo: justynImg,
   },
   {
     name: 'Keith Nicolai R. San Miguel',
-    role: 'Customer Success',
-    bio: 'Guides onboarding and makes sure teams get value fast.',
-    photo: 'RC',
+    role: 'System Analyst',
+    bio: 'Ensures system efficiency and aligns technical solutions with business needs.',
+    photo: keithImg,
+  },
+  {
+    name: 'Kerr Lawrence T. Atabelo',
+    role: 'System Analyst',
+    bio: 'Focuses on optimizing system performance and user requirements.',
+    photo: kerrImg,
   },
 ];
 
@@ -59,17 +65,14 @@ export default function About() {
             </div>
             <div className="about-pillars">
               <div className="pillar">
-                <p className="pillar-title"></p>
-                <p className="pillar-copy"></p>
+                <p className="pillar-title">Overview</p>
+                <p className="pillar-copy">This the overview of the team who are responsible for creating the system entitled Play and Palm Inventory Management System</p>
               </div>
-              <div className="pillar">
-                <p className="pillar-title"></p>
-                <p className="pillar-copy"></p>
-              </div>
-              <div className="pillar">
-                <p className="pillar-title"></p>
-                <p className="pillar-copy"></p>
-              </div>
+              {/* <div className="pillar">
+                <p className="pillar-title">About the team</p>
+                <p className="pillar-copy">These are th</p>
+              </div> */}
+              
             </div>
           </section>
 
@@ -87,7 +90,13 @@ export default function About() {
             <div className="team-grid">
               {TEAM_MEMBERS.map((member) => (
                 <div key={member.name} className="team-card">
-                  <div className="avatar">{member.photo}</div>
+                  <div className="avatar">
+                    <img
+                      src={member.photo}
+                      alt={`${member.name} portrait`}
+                      className="avatar-img"
+                    />
+                  </div>
                   <div className="team-text">
                     <h3 className="team-member-name">{member.name}</h3>
                     <p className="team-member-role">{member.role}</p>

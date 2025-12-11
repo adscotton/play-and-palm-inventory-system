@@ -21,6 +21,8 @@ export default function InventoryList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const role = (localStorage.getItem('userRole') || '').toLowerCase();
+  const canAddItems = role === 'admin' || role === 'manager';
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,12 +91,14 @@ export default function InventoryList() {
         <main className="app-content">
           <div className="inventory-header">
             <h1 className="inventory-title">Inventory Records</h1>
-            <button
-              onClick={() => navigate('/add')}
-              className="btn btn-primary inventory-add-button"
-            >
-              + Add New Item
-            </button>
+            {canAddItems && (
+              <button
+                onClick={() => navigate('/add')}
+                className="btn btn-primary inventory-add-button"
+              >
+                + Add New Item
+              </button>
+            )}
           </div>
 
           <div className="inventory-filters">

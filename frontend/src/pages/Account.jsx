@@ -181,7 +181,7 @@ export default function Account() {
             <form className="account-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-field">
-                  <label>First name</label>
+                  <label>*</label>
                   <input
                     name="firstName"
                     value={user.firstName || ''}
@@ -191,7 +191,7 @@ export default function Account() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Last name</label>
+                  <label>Last name*</label>
                   <input
                     name="lastName"
                     value={user.lastName || ''}
@@ -204,7 +204,7 @@ export default function Account() {
 
               <div className="form-row">
                 <div className="form-field">
-                  <label>Username</label>
+                  <label>Username*</label>
                   <input
                     name="username"
                     value={user.username || ''}
@@ -214,7 +214,7 @@ export default function Account() {
                   />
                 </div>
                 <div className="form-field">
-                  <label>Email</label>
+                  <label>Email*</label>
                   <input
                     name="email"
                     type="email"
@@ -228,7 +228,7 @@ export default function Account() {
 
               <div className="form-row">
                 <div className="form-field">
-                  <label>Role</label>
+                  <label>Role*</label>
                   <select name="role" value={user.role || 'staff'} onChange={handleChange} disabled={!editMode}>
                     <option value="admin">Admin</option>
                     <option value="manager">Manager</option>
@@ -236,7 +236,7 @@ export default function Account() {
                   </select>
                 </div>
                 <div className="form-field">
-                  <label>Contact Number</label>
+                  <label>Contact Number*</label>
                   <input
                     name="contactNumber"
                     value={user.contactNumber || ''}
@@ -248,7 +248,7 @@ export default function Account() {
 
               <div className="form-row">
                 <div className="form-field full">
-                  <label>Location</label>
+                  <label>Location*</label>
                   <input name="location" value={user.location || ''} onChange={handleChange} disabled={!editMode} />
                 </div>
               </div>

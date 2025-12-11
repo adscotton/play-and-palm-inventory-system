@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
+import logo from '../utils/logo.png';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
@@ -66,7 +67,9 @@ export default function Login() {
     <div className="login-shell">
       <div className="login-hero">
         <div className="hero-brand">
-          <div className="hero-logo-placeholder">Your Logo</div>
+          <div className="hero-logo-placeholder">
+            <img src={logo} alt="Play & Palm logo" className="hero-logo-img" />
+          </div>
           <div>
             <h1 className="hero-title">Play &amp; Palm IMS</h1>
             <p className="hero-subtitle">Inventory Management System</p>

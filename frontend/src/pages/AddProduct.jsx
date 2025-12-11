@@ -51,6 +51,13 @@ export default function AddProduct() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (isStaff) {
+      navigate('/inventory', { replace: true });
+    }
+  }, [isStaff, navigate]);
+
+  useEffect(() => {
+    if (isStaff) return;
     fetch(`${API_BASE}/api/products`)
       .then((res) => res.ok ? res.json() : [])
       .then((data) => {

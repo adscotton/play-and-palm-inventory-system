@@ -36,24 +36,30 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', async (req, res) => {
+  const base = {
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  };
+
   if (!hasSupabaseKey || !supabase) {
-    return res.json({
-      status: 'ok',
-      supabase: 'disabled',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    });
+    return res.json({ status: 'ok', supabase: 'disabled', ...base });
   }
   try {
-    const { error } = await supabase.rpc('pg_sleep', { seconds: 0 });
-    res.json({
-      status: error ? 'error' : 'ok',
-      supabase: error ? 'failed' : 'connected',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-    });
+    // Lightweight Supabase probe: head-only select against products table
+    const { error } = await supabase
+      .from('products')
+      .select('id', { head: true, count: 'exact' })
+      .limit(1);
+
+    if (error) {
+      console.error('Supabase health check failed:', error.message || error);
+      return res.status(503).json({ status: 'error', supabase: 'failed', supabaseError: error.message, ...base });
+    }
+
+    res.json({ status: 'ok', supabase: 'connected', ...base });
   } catch (err) {
-    res.status(500).json({ status: 'error', error: 'Health check failed' });
+    console.error('Health check exception:', err);
+    res.status(503).json({ status: 'error', supabase: 'failed', supabaseError: err.message || 'Health check failed', ...base });
   }
 });
 
