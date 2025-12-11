@@ -85,22 +85,22 @@ export default function CreateUser() {
               <form onSubmit={handleSubmit} className="account-form">
                 <div className="form-row">
                   <div className="form-field">
-                    <label>Username</label>
+                    <label>Username*</label>
                     <input name="username" value={form.username} onChange={handleChange} className="form-input" />
                   </div>
                   <div className="form-field">
-                    <label>Email</label>
+                    <label>Email*</label>
                     <input name="email" type="email" value={form.email} onChange={handleChange} className="form-input" />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-field">
-                    <label>Password</label>
+                    <label>Password*</label>
                     <input name="password" type="password" value={form.password} onChange={handleChange} className="form-input" />
                   </div>
                   <div className="form-field">
-                    <label>Role</label>
+                    <label>Role*</label>
                     <select name="role" value={form.role} onChange={handleChange} className="form-input">
                       {ROLE_OPTIONS.map((r) => (
                         <option key={r} value={r}>{r}</option>
@@ -111,22 +111,22 @@ export default function CreateUser() {
 
                 <div className="form-row">
                   <div className="form-field">
-                    <label>First Name</label>
+                    <label>First Name*</label>
                     <input name="firstName" value={form.firstName} onChange={handleChange} className="form-input" />
                   </div>
                   <div className="form-field">
-                    <label>Last Name</label>
+                    <label>Last Name*</label>
                     <input name="lastName" value={form.lastName} onChange={handleChange} className="form-input" />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-field">
-                    <label>Contact</label>
+                    <label>Contact*</label>
                     <input name="contactNumber" value={form.contactNumber} onChange={handleChange} className="form-input" />
                   </div>
                   <div className="form-field">
-                    <label>Location</label>
+                    <label>Location*</label>
                     <input name="location" value={form.location} onChange={handleChange} className="form-input" />
                   </div>
                 </div>
